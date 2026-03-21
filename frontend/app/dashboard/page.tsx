@@ -86,24 +86,70 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [simulating, setSimulating] = useState(false);
 
-  const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    try {
-      const [statsData, mapData, alertsData] = await Promise.all([
-        api.getDashboardStats(),
-        api.getMapProjects(),
-        api.getAllAlerts(15)
-      ]);
-      setStats(statsData);
-      setProjects(mapData);
-      setAlerts(alertsData);
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+const fetchData = useCallback(async (isRefresh = false) => {
+  if (isRefresh) setRefreshing(true);
+  try {
+    const [statsData, mapData, alertsData] = await Promise.all([
+      api.getDashboardStats(),
+      api.getMapProjects(),
+      api.getAllAlerts(15)
+    ]);
+    setStats(statsData);
+    setProjects(mapData);
+    setAlerts(alertsData);
+  } catch (error) {
+    console.error('Failed to fetch dashboard data:', error);
+    // Mock data for demo on Vercel
+    setStats({
+      total_projects: 12847,
+      active_projects: 8742,
+      high_risk_projects: 156,
+      delayed_projects: 89,
+      total_budget: 4200000000000,
+      national_risk_score: 12.4,
+      integrity_score: 87.6
+    });
+    setProjects([
+      {
+        id: 'proj-001',
+        name: 'Delhi-Mumbai Expressway',
+        state: 'Maharashtra',
+        risk_level: 'green',
+        budget: 12000000000,
+        progress_percent: 78,
+        lat: 19.0760,
+        lon: 72.8777,
+        status: 'active'
+      },
+      {
+        id: 'proj-002',
+        name: 'PM Gati Shakti Terminal',
+        state: 'Gujarat',
+        risk_level: 'yellow',
+        budget: 8500000000,
+        progress_percent: 45,
+        lat: 23.0225,
+        lon: 72.5714,
+        status: 'delayed'
+      }
+    ]);
+    setAlerts([
+      {
+        id: 'alert-1',
+        title: 'Material Anomaly - Cement Grade',
+        description: 'M20 cement detected in M25 spec bridge pour. Vendor: ABC Infra',
+        project_id: 'proj-001',
+        severity: 'high',
+        is_read: false,
+        timestamp: '2024-06-15T10:30:00Z',
+        type: 'evidence_failure'
+      }
+    ]);
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+}, []);
 
   useEffect(() => {
     fetchData();
