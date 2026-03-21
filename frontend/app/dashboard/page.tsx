@@ -105,6 +105,7 @@ const fetchData = useCallback(async (isRefresh = false) => {
       active_projects: 8742,
       high_risk_projects: 156,
       delayed_projects: 89,
+      avg_delay_percent: 12,
       total_budget: 4200000000000,
       national_risk_score: 12.4,
       integrity_score: 87.6
