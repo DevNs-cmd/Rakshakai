@@ -3,27 +3,23 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api';
-import { Project, Evidence, RiskHistoryPoint, Milestone, Alert } from '@/lib/types';
+import { Project, Evidence, RiskHistoryPoint, Milestone } from '@/lib/types';
 import RiskGauge from '@/components/RiskGauge';
 import EvidenceUpload from '@/components/EvidenceUpload';
+import Glass3D from '@/components/Glass3D';
 import { 
   ArrowLeft, 
   MapPin, 
   IndianRupee, 
   Calendar, 
   User, 
-  Building2, 
   CheckCircle2, 
   Clock, 
   FileText,
   AlertTriangle,
   Zap,
-  Play,
   History,
-  Info,
-  ExternalLink,
-  ShieldCheck,
-  ChevronDown
+  ShieldCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -174,51 +170,57 @@ export default function ProjectDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-10">
           {/* Main Visual Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-card p-8 flex flex-col items-center justify-center bg-white shadow-card">
-              <RiskGauge score={project.risk_score} size={150} />
-              <div className="mt-4 text-center">
-                <p className={`text-sm font-black uppercase tracking-[0.2em] ${project.risk_level === 'red' ? 'text-red-600' : 'text-green-600'}`}>
-                  {project.risk_level} SHIELD
-                </p>
-              </div>
-            </div>
-
-            <div className="glass-card p-8 flex flex-col items-center justify-center bg-white shadow-card">
-              <div className="relative w-32 h-32 flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="64" cy="64" r="58" stroke="#f1f5f9" strokeWidth="10" fill="transparent" />
-                  <motion.circle 
-                    cx="64" cy="64" r="58" stroke="#1e40af" strokeWidth="10" fill="transparent"
-                    strokeDasharray={364.4}
-                    initial={{ strokeDashoffset: 364.4 }}
-                    animate={{ strokeDashoffset: 364.4 - (364.4 * project.progress_percent / 100) }}
-                    transition={{ duration: 1.5 }}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-black text-rakshak-navy">{project.progress_percent}%</span>
-                  <span className="text-[8px] font-black text-slate-400 tracking-widest uppercase">Verified</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 perspective-1000">
+            <Glass3D intensity={15}>
+              <div className="glass-card p-8 flex flex-col items-center justify-center bg-white shadow-card h-full overflow-hidden transition-all group hover:shadow-card-hover">
+                <RiskGauge score={project.risk_score} size={150} />
+                <div className="mt-4 text-center">
+                  <p className={`text-sm font-black uppercase tracking-[0.2em] ${project.risk_level === 'red' ? 'text-red-600' : 'text-green-600'}`}>
+                    {project.risk_level} SHIELD
+                  </p>
                 </div>
               </div>
-              <div className="mt-6 text-center">
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Milestone Progress</p>
-              </div>
-            </div>
+            </Glass3D>
 
-            <div className="glass-card p-8 flex flex-col items-center justify-center bg-white shadow-card">
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
-                <Calendar className="w-8 h-8 text-rakshak-blue" />
+            <Glass3D intensity={15}>
+              <div className="glass-card p-8 flex flex-col items-center justify-center bg-white shadow-card h-full overflow-hidden transition-all group hover:shadow-card-hover">
+                <div className="relative w-32 h-32 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle cx="64" cy="64" r="58" stroke="#f1f5f9" strokeWidth="10" fill="transparent" />
+                    <motion.circle 
+                      cx="64" cy="64" r="58" stroke="#1e40af" strokeWidth="10" fill="transparent"
+                      strokeDasharray={364.4}
+                      initial={{ strokeDashoffset: 364.4 }}
+                      animate={{ strokeDashoffset: 364.4 - (364.4 * project.progress_percent / 100) }}
+                      transition={{ duration: 1.5 }}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-2xl font-black text-rakshak-navy">{project.progress_percent}%</span>
+                    <span className="text-[8px] font-black text-slate-400 tracking-widest uppercase">Verified</span>
+                  </div>
+                </div>
+                <div className="mt-6 text-center">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Milestone Progress</p>
+                </div>
               </div>
-              <div className="text-center space-y-1">
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Deadline</p>
-                <p className="text-lg font-bold text-rakshak-navy">{format(new Date(project.deadline), 'dd MMM yyyy')}</p>
-                <p className="text-[10px] text-slate-500 font-bold uppercase">
-                  {Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 3600 * 24))} Days Left
-                </p>
+            </Glass3D>
+
+            <Glass3D intensity={15}>
+              <div className="glass-card p-8 flex flex-col items-center justify-center bg-white shadow-card h-full overflow-hidden transition-all group hover:shadow-card-hover">
+                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                  <Calendar className="w-8 h-8 text-rakshak-blue" />
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Deadline</p>
+                  <p className="text-lg font-bold text-rakshak-navy">{format(new Date(project.deadline), 'dd MMM yyyy')}</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">
+                    {Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 3600 * 24))} Days Left
+                  </p>
+                </div>
               </div>
-            </div>
+            </Glass3D>
           </div>
 
           {/* Risk History Chart */}

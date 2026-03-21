@@ -65,11 +65,17 @@ class ApiClient {
 
   async markAlertRead(alertId: string) {
     const res = await this.client.patch(`/dashboard/alerts/${alertId}/read`);
+
     return res.data;
   }
 
   async getAuditLogs(limit = 50) {
     const res = await this.client.get('/dashboard/audit-logs', { params: { limit } });
+    return res.data;
+  }
+
+  async simulateGlobalFailure() {
+    const res = await this.client.post('/dashboard/simulate-failure');
     return res.data;
   }
 

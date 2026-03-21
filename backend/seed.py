@@ -1,260 +1,272 @@
 """
-Database seeder — creates realistic Indian infrastructure project data.
+RAKSHAK — Database Seeder
+Creates realistic Indian infrastructure project data
 """
 import asyncio
+import random
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select
-from database import AsyncSessionLocal
-from models import User, Contractor, Project, Milestone, ProjectStatus, RiskLevel
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import async_session
+from models import (
+    User, Contractor, Project, Milestone, ProjectStatus, RiskLevel
+)
 from auth import get_password_hash
-import random
+import logging
 
-INDIAN_PROJECTS = [
-    {
-        "name": "NH-44 Highway Expansion - Jammu to Srinagar",
-        "state": "Jammu & Kashmir",
-        "district": "Ramban",
-        "latitude": 33.2455,
-        "longitude": 75.2590,
-        "budget": 45000000000,
-        "progress_percent": 38.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "National Highway expansion for all-weather connectivity",
-    },
-    {
-        "name": "Mumbai Coastal Road Phase 2",
-        "state": "Maharashtra",
-        "district": "Mumbai",
-        "latitude": 18.9217,
-        "longitude": 72.8318,
-        "budget": 12800000000,
-        "progress_percent": 62.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "Coastal road for decongesting Mumbai",
-    },
-    {
-        "name": "Narmada District Irrigation Canal",
-        "state": "Madhya Pradesh",
-        "district": "Narmadapuram",
-        "latitude": 22.7577,
-        "longitude": 77.7327,
-        "budget": 6200000000,
-        "progress_percent": 21.0,
-        "status": ProjectStatus.DELAYED,
-        "description": "Canal network for agricultural irrigation",
-    },
-    {
-        "name": "Bangalore Metro Phase 3 - Outer Ring Road",
-        "state": "Karnataka",
-        "district": "Bengaluru Urban",
-        "latitude": 12.9716,
-        "longitude": 77.5946,
-        "budget": 15600000000,
-        "progress_percent": 47.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "Metro expansion to outer ring road corridors",
-    },
-    {
-        "name": "Rajasthan Solar Park - Bhadla Phase 4",
-        "state": "Rajasthan",
-        "district": "Jodhpur",
-        "latitude": 27.5330,
-        "longitude": 71.9167,
-        "budget": 8900000000,
-        "progress_percent": 78.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "2300MW solar park extension",
-    },
-    {
-        "name": "Kolkata East-West Metro Extension",
-        "state": "West Bengal",
-        "district": "Howrah",
-        "latitude": 22.5726,
-        "longitude": 88.3639,
-        "budget": 9400000000,
-        "progress_percent": 55.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "Metro extension to Howrah Maidan",
-    },
-    {
-        "name": "Rural Electrification - Odisha Tribal Belt",
-        "state": "Odisha",
-        "district": "Koraput",
-        "latitude": 18.8135,
-        "longitude": 82.7126,
-        "budget": 2100000000,
-        "progress_percent": 15.0,
-        "status": ProjectStatus.DELAYED,
-        "description": "Last-mile electricity connectivity for tribal villages",
-    },
-    {
-        "name": "Chennai Peripheral Ring Road",
-        "state": "Tamil Nadu",
-        "district": "Kancheepuram",
-        "latitude": 12.8829,
-        "longitude": 80.0817,
-        "budget": 11200000000,
-        "progress_percent": 33.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "128km peripheral ring road for freight movement",
-    },
-    {
-        "name": "Uttarakhand Char Dham All-Weather Road",
-        "state": "Uttarakhand",
-        "district": "Chamoli",
-        "latitude": 30.4162,
-        "longitude": 79.3124,
-        "budget": 12000000000,
-        "progress_percent": 44.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "Four-lane highway to all four dhams",
-    },
-    {
-        "name": "Delhi-Meerut RRTS Corridor",
-        "state": "Uttar Pradesh",
-        "district": "Ghaziabad",
-        "latitude": 28.6692,
-        "longitude": 77.4538,
-        "budget": 30200000000,
-        "progress_percent": 71.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "Regional Rapid Transit System corridor",
-    },
-    {
-        "name": "Guwahati Water Supply Project",
-        "state": "Assam",
-        "district": "Kamrup Metro",
-        "latitude": 26.1445,
-        "longitude": 91.7362,
-        "budget": 1800000000,
-        "progress_percent": 29.0,
-        "status": ProjectStatus.DELAYED,
-        "description": "24x7 piped water supply for Guwahati city",
-    },
-    {
-        "name": "Kochi Smart City Infrastructure",
-        "state": "Kerala",
-        "district": "Ernakulam",
-        "latitude": 9.9312,
-        "longitude": 76.2673,
-        "budget": 3400000000,
-        "progress_percent": 58.0,
-        "status": ProjectStatus.ACTIVE,
-        "description": "Smart city command center and fiber network",
-    },
+logger = logging.getLogger("rakshak.seed")
+
+# ── Sample Data ───────────────────────────────────────────────────────────────
+
+INDIAN_STATES = [
+    ("Maharashtra", "Mumbai", 19.0760, 72.8777),
+    ("Uttar Pradesh", "Lucknow", 26.8467, 80.9462),
+    ("Karnataka", "Bengaluru", 12.9716, 77.5946),
+    ("Tamil Nadu", "Chennai", 13.0827, 80.2707),
+    ("Rajasthan", "Jaipur", 26.9124, 75.7873),
+    ("Gujarat", "Ahmedabad", 23.0225, 72.5714),
+    ("West Bengal", "Kolkata", 22.5726, 88.3639),
+    ("Telangana", "Hyderabad", 17.3850, 78.4867),
+    ("Madhya Pradesh", "Bhopal", 23.2599, 77.4126),
+    ("Kerala", "Thiruvananthapuram", 8.5241, 76.9366),
+    ("Delhi", "New Delhi", 28.6139, 77.2090),
+    ("Bihar", "Patna", 25.5941, 85.1376),
 ]
 
-CONTRACTORS = [
-    {"name": "L&T Construction Ltd", "registration_no": "LT-CON-2019-001", "avg_delay_days": 12, "risk_score": 15},
-    {"name": "GMR Infrastructure Ltd", "registration_no": "GMR-INF-2018-002", "avg_delay_days": 25, "risk_score": 28},
-    {"name": "Afcons Infrastructure Ltd", "registration_no": "AFC-INF-2017-003", "avg_delay_days": 8, "risk_score": 12},
-    {"name": "Dilip Buildcon Ltd", "registration_no": "DBL-CON-2020-004", "avg_delay_days": 45, "risk_score": 65},
-    {"name": "KEC International Ltd", "registration_no": "KEC-INT-2019-005", "avg_delay_days": 18, "risk_score": 32},
+INFRASTRUCTURE_PROJECTS = [
+    # (name, description, budget in crores, duration days, progress)
+    ("National Highway Expansion", "4-lane highway expansion with bridges", 500, 730, 45),
+    ("Metro Rail Phase II", "Underground metro line extension", 1200, 1095, 30),
+    ("Smart City Infrastructure", "IoT-enabled city management systems", 300, 547, 60),
+    ("Water Treatment Plant", "Advanced water purification facility", 150, 456, 75),
+    ("Solar Power Station", "500MW solar photovoltaic installation", 800, 912, 40),
+    ("AIIMS Medical Campus", "Super-specialty hospital and medical college", 1000, 1460, 25),
+    ("Airport Terminal Expansion", "New terminal with enhanced capacity", 600, 912, 55),
+    ("Rural Road Connectivity", "PMGSY rural road construction", 80, 365, 80),
+    ("Irrigation Canal Network", "Canal construction for agricultural areas", 200, 730, 35),
+    ("Digital Education Hub", "Educational technology infrastructure", 120, 456, 70),
 ]
+
+CONTRACTOR_DATA = [
+    ("Larsen & Toubro Ltd", "LNT-CON-1989-001", 12, 0.05),
+    ("Tata Projects Ltd", "TPL-CON-1995-002", 8, 0.03),
+    ("Gammon India Ltd", "GIL-CON-1922-003", 35, 0.15),
+    ("Hindustan Construction Co", "HCC-CON-1926-004", 28, 0.12),
+    ("Shapoorji Pallonji & Co", "SPC-CON-1865-005", 15, 0.08),
+    ("GMR Infrastructure Ltd", "GMR-INF-1978-006", 22, 0.10),
+    ("IRB Infrastructure", "IRB-INF-1998-007", 18, 0.09),
+    ("Afcons Infrastructure", "AFC-INF-1976-008", 10, 0.06),
+    ("Simplex Infrastructure", "SIC-INF-1924-009", 42, 0.18),
+    ("Patel Engineering Ltd", "PEL-CON-1949-010", 55, 0.22),
+]
+
+MILESTONE_TEMPLATE = [
+    ("Project Planning & Approvals", 5.0),
+    ("Land Acquisition", 10.0),
+    ("Detailed Design & Engineering", 10.0),
+    ("Foundation & Earthwork", 15.0),
+    ("Structural Construction", 20.0),
+    ("Mechanical & Electrical", 15.0),
+    ("Testing & Commissioning", 10.0),
+    ("Final Handover", 5.0),
+    ("Defect Liability Period", 5.0),
+    ("Project Closure", 5.0),
+]
+
+
+def generate_geog_point(lat: float, lon: float) -> str:
+    """Generate PostGIS geography point."""
+    return f"SRID=4326;POINT({lon} {lat})"
 
 
 async def seed_database():
-    async with AsyncSessionLocal() as db:
+    """Seed the database with realistic project data."""
+    async with async_session() as db:
         # Check if already seeded
         result = await db.execute(select(User).limit(1))
         if result.scalar_one_or_none():
-            return  # Already seeded
-        
-        # Create admin user
+            logger.info("Database already seeded, skipping")
+            return
+
+        logger.info("🌱 Seeding database...")
+
+        # ── Create Users ───────────────────────────────────────────────────
         admin = User(
             email="admin@rakshak.gov.in",
             full_name="System Administrator",
             hashed_password=get_password_hash("Admin@123"),
             role="admin",
-            department="Ministry of Road Transport",
+            department="Ministry of Infrastructure",
+            is_active=True
         )
-        
-        officer = User(
-            email="officer@rakshak.gov.in",
-            full_name="Field Officer Singh",
+
+        officer1 = User(
+            email="officer1@rakshak.gov.in",
+            full_name="Rajesh Kumar",
             hashed_password=get_password_hash("Officer@123"),
             role="officer",
-            department="NHAI",
+            department="National Highways",
+            is_active=True
         )
-        
+
+        officer2 = User(
+            email="officer2@rakshak.gov.in",
+            full_name="Priya Sharma",
+            hashed_password=get_password_hash("Officer@123"),
+            role="officer",
+            department="Urban Development",
+            is_active=True
+        )
+
         auditor = User(
             email="auditor@rakshak.gov.in",
-            full_name="Dr. Priya Auditor",
+            full_name="Dr. Venkat Iyer",
             hashed_password=get_password_hash("Auditor@123"),
             role="auditor",
-            department="CAG",
+            department="CAG Office",
+            is_active=True
         )
-        
-        db.add_all([admin, officer, auditor])
+
+        db.add_all([admin, officer1, officer2, auditor])
         await db.flush()
-        
-        # Create contractors
+        logger.info(f"✅ Created {4} users")
+
+        # ── Create Contractors ──────────────────────────────────────────────
         contractors = []
-        for c_data in CONTRACTORS:
+        for name, reg_no, avg_delay, failure_rate in CONTRACTOR_DATA:
             contractor = Contractor(
-                name=c_data["name"],
-                registration_no=c_data["registration_no"],
-                avg_delay_days=c_data["avg_delay_days"],
-                risk_score=c_data["risk_score"],
-                total_projects=random.randint(10, 50),
-                completed_projects=random.randint(5, 30),
+                name=name,
+                registration_no=reg_no,
+                contact_email=f"contact@{name.lower().replace(' ', '').replace('&', '')}.com",
+                contact_phone=f"+91-{random.randint(7000000000, 9999999999)}",
+                total_projects=random.randint(20, 200),
+                completed_projects=random.randint(10, 150),
+                failed_projects=random.randint(0, 10),
+                avg_delay_days=avg_delay,
+                failure_rate=failure_rate,
+                risk_score=min(100, (avg_delay / 60 * 50) + (failure_rate * 100)),
             )
-            db.add(contractor)
             contractors.append(contractor)
-        
+            db.add(contractor)
+
         await db.flush()
-        
-        # Create projects
+        logger.info(f"✅ Created {len(contractors)} contractors")
+
+        # ── Create Projects ────────────────────────────────────────────────
         now = datetime.now(timezone.utc)
-        for i, p_data in enumerate(INDIAN_PROJECTS):
+        projects = []
+
+        for i in range(20):  # Create 20 projects
+            state_info = INDIAN_STATES[i % len(INDIAN_STATES)]
+            project_template = INFRASTRUCTURE_PROJECTS[i % len(INFRASTRUCTURE_PROJECTS)]
             contractor = contractors[i % len(contractors)]
-            start = now - timedelta(days=random.randint(180, 730))
-            deadline = now + timedelta(days=random.randint(90, 730))
-            
+
+            name, description, budget_crores, duration_days, base_progress = project_template
+
+            # Add state prefix to name
+            full_name = f"{state_info[0]}: {name} Phase {i // len(INDIAN_STATES) + 1}"
+
+            # Generate random location near state capital
+            lat = state_info[2] + random.uniform(-0.5, 0.5)
+            lon = state_info[3] + random.uniform(-0.5, 0.5)
+
+            # Random dates
+            days_ago = random.randint(90, 400)
+            start_date = now - timedelta(days=days_ago)
+            deadline = start_date + timedelta(days=duration_days)
+
+            # Random progress with some variance
+            progress = min(100, max(0, base_progress + random.randint(-10, 10)))
+
+            # Determine status
+            if progress >= 100:
+                status = ProjectStatus.COMPLETED
+                progress = 100
+            elif deadline < now:
+                status = ProjectStatus.DELAYED
+            elif progress < days_ago / duration_days * 100 - 20:
+                status = ProjectStatus.DELAYED
+            else:
+                status = ProjectStatus.ACTIVE
+
+            # Calculate spent amount based on progress and some variance
+            budget = budget_crores * 10000000  # Convert crores to actual
+            spent = budget * (progress / 100) * random.uniform(0.8, 1.3)
+
             project = Project(
-                name=p_data["name"],
-                state=p_data["state"],
-                district=p_data["district"],
-                latitude=p_data["latitude"],
-                longitude=p_data["longitude"],
-                budget=p_data["budget"],
-                spent_amount=p_data["budget"] * (p_data["progress_percent"] / 100) * random.uniform(0.8, 1.3),
-                start_date=start,
+                name=full_name,
+                description=f"{description}. Located in {state_info[1]}, {state_info[0]}.",
+                state=state_info[0],
+                district=state_info[1],
+                latitude=lat,
+                longitude=lon,
+                geog_point=generate_geog_point(lat, lon),
+                radius_meters=random.choice([500, 750, 1000, 1500]),
+                budget=budget,
+                spent_amount=spent,
+                start_date=start_date,
                 deadline=deadline,
-                progress_percent=p_data["progress_percent"],
-                status=p_data["status"],
-                description=p_data["description"],
-                contractor_id=contractor.id,
-                radius_meters=1000.0,
-                required_evidence_types=["construction_photo", "material_delivery", "inspection_report"],
-                created_by=admin.id,
+                progress_percent=progress,
+                status=status,
                 risk_score=0.0,
                 risk_level=RiskLevel.GREEN,
+                contractor_id=contractor.id,
+                created_by=admin.id,
+                required_evidence_types=["site_photo", "progress_report", "inspection"],
+                min_evidence_interval_days=7,
             )
-            
+
+            projects.append(project)
             db.add(project)
-            await db.flush()
-            
-            # Add milestones
-            milestone_templates = [
-                ("Site Preparation & Clearance", 10.0),
-                ("Foundation & Earthwork", 20.0),
-                ("Structural Work Phase 1", 20.0),
-                ("Structural Work Phase 2", 20.0),
-                ("Finishing & QC", 15.0),
-                ("Inspection & Handover", 15.0),
-            ]
-            
-            for j, (title, weight) in enumerate(milestone_templates):
-                ms_date = start + timedelta(days=int((deadline - start).days * (j + 1) / len(milestone_templates)))
-                ms = Milestone(
+
+        await db.flush()
+        logger.info(f"✅ Created {len(projects)} projects")
+
+        # ── Create Milestones ─────────────────────────────────────────────
+        milestone_count = 0
+        for project in projects:
+            total_duration = (project.deadline - project.start_date).days
+            current_date = project.start_date
+
+            for idx, (title, weight) in enumerate(MILESTONE_TEMPLATE):
+                # Calculate due date based on weight
+                days_offset = int(total_duration * sum(w for _, w in MILESTONE_TEMPLATE[:idx+1]) / 100)
+                due_date = project.start_date + timedelta(days=days_offset)
+
+                # Determine if completed based on project progress
+                cumulative_weight = sum(w for _, w in MILESTONE_TEMPLATE[:idx+1])
+                is_completed = project.progress_percent >= cumulative_weight
+                completion_date = None
+
+                if is_completed:
+                    completion_date = due_date - timedelta(days=random.randint(0, 14))
+
+                milestone = Milestone(
                     project_id=project.id,
                     title=title,
-                    due_date=ms_date,
+                    description=f"{title} for {project.name}",
+                    due_date=due_date,
+                    completion_date=completion_date,
+                    is_completed=is_completed,
                     weight_percent=weight,
-                    order_index=j,
-                    is_completed=p_data["progress_percent"] >= (sum(w for _, w in milestone_templates[:j + 1])),
+                    order_index=idx,
                 )
-                db.add(ms)
-        
+                db.add(milestone)
+                milestone_count += 1
+
+        await db.flush()
+        logger.info(f"✅ Created {milestone_count} milestones")
+
+        # ── Commit Everything ─────────────────────────────────────────────
         await db.commit()
+        logger.info("✅ Database seeding complete!")
+        logger.info(f"   - Users: 4")
+        logger.info(f"   - Contractors: {len(contractors)}")
+        logger.info(f"   - Projects: {len(projects)}")
+        logger.info(f"   - Milestones: {milestone_count}")
+
+
+if __name__ == "__main__":
+    # Configure logging for standalone run
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(seed_database())

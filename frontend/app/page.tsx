@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import * as THREE from 'three';
+import { ArrowRight } from 'lucide-react';
+import IntegrityTicker from '@/components/IntegrityTicker';
 
 // ── Animated Counter Component ────────────────────────────────────────────────
 function AnimatedCounter({ target, duration = 2, suffix = '', prefix = '' }: {
@@ -39,191 +41,138 @@ function AnimatedCounter({ target, duration = 2, suffix = '', prefix = '' }: {
   }, [started, target, duration]);
 
   return (
-    <span ref={ref} className="counter-animation">
+    <span ref={ref} className="counter-animation text-rakshak-blue">
       {prefix}{count.toLocaleString('en-IN')}{suffix}
     </span>
   );
 }
 
 // ── Three.js Globe Component ───────────────────────────────────────────────────
+// ── Photorealistic Globe Component (Upgraded) ──────────────────────────────────
 function IndiaGlobe() {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
-
-    const scene = new THREE.Scene();
     const w = mountRef.current.clientWidth;
     const h = mountRef.current.clientHeight;
-    
-    // Adjusted camera for mobile/desktop
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-    camera.position.z = isMobile ? 4.2 : 3.5;
+    camera.position.z = 3.2;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, logarithmicDepthBuffer: true });
-    try {
-      renderer.setSize(w, h);
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.toneMapping = THREE.ReinhardToneMapping;
-      renderer.toneMappingExposure = 1.5;
-      mountRef.current.appendChild(renderer.domElement);
-    } catch (e) {
-      console.error('Three.js failed to initialize:', e);
-      return;
-    }
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    mountRef.current.appendChild(renderer.domElement);
 
-    // ── Celestial Stars Background ──────────────────────────
-    const starGeom = new THREE.BufferGeometry();
-    const starCount = isMobile ? 1000 : 3000;
-    const starCoords = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount * 3; i++) {
-      starCoords[i] = (Math.random() - 0.5) * 2000;
+    const loader = new THREE.TextureLoader();
+    
+    // High-res texture URLs
+    const TEXTURES = {
+      day: 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
+      night: 'https://unpkg.com/three-globe/example/img/earth-night.jpg',
+      clouds: 'https://unpkg.com/three-globe/example/img/earth-clouds.png',
+      topology: 'https://unpkg.com/three-globe/example/img/earth-topology.png',
+      specular: 'https://unpkg.com/three-globe/example/img/earth-water.png'
+    };
+
+    const globeGroup = new THREE.Group();
+    scene.add(globeGroup);
+
+    // 🌍 Earth Sphere with Detailed Textures
+    const geometry = new THREE.SphereGeometry(1, 64, 64);
+    const material = new THREE.MeshPhongMaterial({
+      map: loader.load(TEXTURES.day),
+      bumpMap: loader.load(TEXTURES.topology),
+      bumpScale: 0.015,
+      specularMap: loader.load(TEXTURES.specular),
+      specular: new THREE.Color('grey'),
+      shininess: 10,
+    });
+    
+    const earth = new THREE.Mesh(geometry, material);
+    globeGroup.add(earth);
+
+    // ☁️ Clouds Layer
+    const cloudGeo = new THREE.SphereGeometry(1.015, 64, 64);
+    const cloudMat = new THREE.MeshPhongMaterial({
+      map: loader.load(TEXTURES.clouds),
+      transparent: true,
+      opacity: 0.4,
+      depthWrite: false,
+    });
+    const clouds = new THREE.Mesh(cloudGeo, cloudMat);
+    globeGroup.add(clouds);
+
+    // ✨ Atmospheric Glow (Shader-like feel with multi-layer)
+    const atmosphereGeo = new THREE.SphereGeometry(1.1, 64, 64);
+    const atmosphereMat = new THREE.MeshPhongMaterial({
+      color: 0x93c5fd,
+      transparent: true,
+      opacity: 0.1,
+      side: THREE.BackSide,
+    });
+    const atmosphere = new THREE.Mesh(atmosphereGeo, atmosphereMat);
+    scene.add(atmosphere);
+
+    // 🏙️ City Lighting Emissive Layer (Simulated via emissive)
+    earth.material.emissiveMap = loader.load(TEXTURES.night);
+    earth.material.emissive = new THREE.Color(0xffff88);
+    earth.material.emissiveIntensity = 0.5;
+
+    // 💡 Realistic Lighting Setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    sunLight.position.set(5, 3, 5);
+    scene.add(sunLight);
+
+    // Background Stars (Static)
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = [];
+    for (let i = 0; i < 2000; i++) {
+       starPos.push((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
     }
-    starGeom.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
-    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, transparent: true, opacity: 0.3 });
-    const stars = new THREE.Points(starGeom, starMat);
+    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.03, transparent: true, opacity: 0.4 });
+    const stars = new THREE.Points(starGeo, starMat);
     scene.add(stars);
 
-    // ── Earth Group ───────────────────────────────────────────
-    const earthGroup = new THREE.Group();
-    scene.add(earthGroup);
-
-    // 1. High-Fidelity Earth Sphere
-    const geometry = new THREE.SphereGeometry(1, 64, 64);
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x0a192f,      // Deep space navy base
-      metalness: 0.4,
-      roughness: 0.7,
-      transparent: true,
-      opacity: 0.98,
-    });
-    const globe = new THREE.Mesh(geometry, material);
-    earthGroup.add(globe);
-
-    // 2. Procedural Land Layout (Subtle glowing grid for tech aesthetic)
-    const landGeom = new THREE.SphereGeometry(1.002, 64, 64);
-    const landMat = new THREE.MeshStandardMaterial({
-      color: 0x3b82f6,
-      emissive: 0x1e40af,
-      emissiveIntensity: 0.6,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.18,
-    });
-    const landOverlay = new THREE.Mesh(landGeom, landMat);
-    earthGroup.add(landOverlay);
-
-    // 3. Atmospheric Rim (Fresnel Shader)
-    const atmGeom = new THREE.SphereGeometry(1.12, 64, 64);
-    const atmMat = new THREE.ShaderMaterial({
-      transparent: true,
-      side: THREE.BackSide,
-      uniforms: {
-        glowColor: { value: new THREE.Color(0x3b82f6) },
-        viewVector: { value: camera.position }
-      },
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          vViewPosition = -mvPosition.xyz;
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 glowColor;
-        varying vec3 vNormal;
-        varying vec3 vViewPosition;
-        void main() {
-          float intensity = pow(0.7 - dot(vNormal, normalize(vViewPosition)), 4.0);
-          gl_FragColor = vec4(glowColor, intensity);
-        }
-      `
-    });
-    const atmosphere = new THREE.Mesh(atmGeom, atmMat);
-    earthGroup.add(atmosphere);
-
-    // ── India Locators ────────────────────────────────────────
-    const indiaPoints = [
-      { lat: 28.6139, lng: 77.2090, label: 'DELHI', risk: 'secure' },
-      { lat: 19.0760, lng: 72.8777, label: 'MUMBAI', risk: 'warning' },
-      { lat: 12.9716, lng: 77.5946, label: 'BANGALORE', risk: 'secure' },
-      { lat: 22.5726, lng: 88.3639, label: 'KOLKATA', risk: 'critical' },
+    // Interaction Rings for India Cities
+    const cities = [
+      { lat: 28.6139, lon: 77.2090 }, // Delhi
+      { lat: 19.0760, lon: 72.8777 }, // Mumbai
+      { lat: 12.9716, lon: 77.5946 }, // Bangalore
     ];
 
-    const markers: THREE.Group[] = [];
-    indiaPoints.forEach((p) => {
-      const phi = (90 - p.lat) * (Math.PI / 180);
-      const theta = (p.lng + 180) * (Math.PI / 180);
-      const x = -(Math.sin(phi) * Math.cos(theta));
-      const z = Math.sin(phi) * Math.sin(theta);
-      const y = Math.cos(phi);
-
-      const markerGrp = new THREE.Group();
-      markerGrp.position.set(x, y, z);
+    cities.forEach(city => {
+      const lat = city.lat * (Math.PI / 180);
+      const lon = -city.lon * (Math.PI / 180);
+      const x = Math.cos(lat) * Math.cos(lon);
+      const y = Math.sin(lat);
+      const z = Math.cos(lat) * Math.sin(lon);
       
-      const hexColor = p.risk === 'secure' ? 0x22c55e : p.risk === 'warning' ? 0xeab308 : 0xef4444;
-      const point = new THREE.Mesh(
-        new THREE.SphereGeometry(0.02, 12, 12),
-        new THREE.MeshBasicMaterial({ color: hexColor })
-      );
-      markerGrp.add(point);
-
-      const beacon = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.005, 0.005, 0.2, 8),
-        new THREE.MeshBasicMaterial({ color: hexColor, transparent: true, opacity: 0.5 })
-      );
-      beacon.position.y = 0.1;
-      markerGrp.add(beacon);
-
-      markerGrp.lookAt(x * 2, y * 2, z * 2);
-      earthGroup.add(markerGrp);
-      markers.push(markerGrp);
+      const ringGeom = new THREE.RingGeometry(0.015, 0.025, 32);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xffa500, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+      const ring = new THREE.Mesh(ringGeom, ringMat);
+      ring.position.set(x, y, z).multiplyScalar(1.02);
+      ring.lookAt(0, 0, 0);
+      (ring as any).isRing = true;
+      globeGroup.add(ring);
     });
 
-    // ── Professional Lighting ───────────────────────────────
-    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-    const sun = new THREE.DirectionalLight(0xffffff, 3.5);
-    sun.position.set(5, 3, 5);
-    scene.add(sun);
-    const rim = new THREE.PointLight(0x3b82f6, 12, 10);
-    rim.position.set(-5, 5, -5);
-    scene.add(rim);
-
-    // ── Interactivity & Animation ──────────────────────────
-    let isDragging = false;
-    let prevX = 0;
-    let targetY = 0;
-
-    const handleStart = (clientX: number) => { isDragging = true; prevX = clientX; };
-    const handleMove = (clientX: number) => {
-      if (isDragging) {
-        targetY += (clientX - prevX) * 0.005;
-        prevX = clientX;
-      }
-    };
-    const handleEnd = () => isDragging = false;
-
-    mountRef.current.addEventListener('mousedown', (e) => handleStart(e.clientX));
-    window.addEventListener('mousemove', (e) => handleMove(e.clientX));
-    window.addEventListener('mouseup', handleEnd);
-    mountRef.current.addEventListener('touchstart', (e) => handleStart(e.touches[0].clientX));
-    window.addEventListener('touchmove', (e) => handleMove(e.changedTouches[0].clientX));
-    window.addEventListener('touchend', handleEnd);
-
-    let time = 0;
     const animate = () => {
-      time += 0.01;
       requestAnimationFrame(animate);
-      if (!isDragging) earthGroup.rotation.y += 0.002;
-      else earthGroup.rotation.y += (targetY - earthGroup.rotation.y) * 0.1;
-
-      stars.rotation.y += 0.0001;
-      markers.forEach((m, i) => {
-        m.scale.setScalar(1 + Math.sin(time * 4 + i) * 0.1);
+      globeGroup.rotation.y += 0.0012;
+      clouds.rotation.y += 0.0008;
+      
+      globeGroup.children.forEach(child => {
+        if ((child as any).isRing) {
+          const s = 1 + Math.sin(Date.now() * 0.004) * 0.4;
+          child.scale.set(s, s, s);
+          ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity = 1 - (s - 0.6);
+        }
       });
       renderer.render(scene, camera);
     };
@@ -231,12 +180,11 @@ function IndiaGlobe() {
 
     const handleResize = () => {
       if (!mountRef.current) return;
-      const nw = mountRef.current.clientWidth;
-      const nh = mountRef.current.clientHeight;
-      camera.aspect = nw / nh;
+      const w = mountRef.current.clientWidth;
+      const h = mountRef.current.clientHeight;
+      camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setSize(nw, nh);
-      camera.position.z = nw < 768 ? 4.2 : 3.5;
+      renderer.setSize(w, h);
     };
     window.addEventListener('resize', handleResize);
 
@@ -250,13 +198,16 @@ function IndiaGlobe() {
   }, []);
 
   return (
-    <div ref={mountRef} className="w-full h-full relative cursor-grab active:cursor-grabbing">
-      <div className="absolute inset-0 pointer-events-none bg-radial-at-c from-transparent via-transparent to-rakshak-blue/10" />
+    <div className="w-full h-full relative cursor-grab group">
+      <div ref={mountRef} className="w-full h-full drop-shadow-[0_20px_60px_rgba(0,0,0,0.4)]" />
+      {/* Globe Shadow */}
+      <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 w-[40%] h-[10%] bg-[#93c5fd]/10 blur-3xl -z-10 rounded-full" />
     </div>
   );
 }
 
-// ── Feature Card ───────────────────────────────────────────────────────────────
+import Glass3D from '@/components/Glass3D';
+
 function FeatureCard({ icon, title, description, delay }: {
   icon: string; title: string; description: string; delay: number;
 }) {
@@ -266,16 +217,19 @@ function FeatureCard({ icon, title, description, delay }: {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay, duration: 0.5 }}
-      className="glass-card p-6 group"
+      className="perspective-1000 h-full"
     >
-      <div className="text-3xl mb-4">{icon}</div>
-      <h3 className="font-semibold text-rakshak-blue text-lg mb-2">{title}</h3>
-      <p className="text-slate-600 text-sm leading-relaxed">{description}</p>
+      <Glass3D intensity={20}>
+        <div className="glass-card p-6 md:p-10 bg-white border border-slate-100 shadow-card hover:shadow-card-hover transition-all h-full group">
+          <div className="text-4xl md:text-5xl mb-6 group-hover:scale-110 transition-transform duration-500">{icon}</div>
+          <h3 className="font-black text-rakshak-navy text-lg md:text-xl mb-3 tracking-tight">{title}</h3>
+          <p className="text-slate-500 text-xs md:text-sm leading-relaxed font-medium">{description}</p>
+        </div>
+      </Glass3D>
     </motion.div>
   );
 }
 
-// ── Main Landing Page ─────────────────────────────────────────────────────────
 export default function LandingPage() {
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
@@ -290,357 +244,256 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: '🛰️',
-      title: 'Real-Time GPS Verification',
-      description: 'Every piece of evidence is geo-tagged and validated against project coordinates. No fake submissions.',
+      icon: '🛡️',
+      title: 'Adaptive Integrity Guard',
+      description: 'Continuous monitoring of financial disbursement against physical milestone signatures using blockchain-linked evidence.',
     },
     {
-      icon: '🤖',
-      title: 'AI Risk Scoring',
-      description: 'XGBoost model analyses timeline, evidence frequency, budget utilization, and contractor history.',
+      icon: '📡',
+      title: 'Sentinel Geo-Analytics',
+      description: 'Satellite-grade verification of construction progress via autonomous image analysis and thermal anomaly detection.',
     },
     {
-      icon: '🗺️',
-      title: 'National Integrity Map',
-      description: 'Live Mapbox visualization of all projects across India with color-coded risk indicators.',
-    },
-    {
-      icon: '⚡',
-      title: 'Real-Time Alerts',
-      description: 'WebSocket-powered notifications for evidence gaps, deadline risks, and anomaly spikes.',
-    },
-    {
-      icon: '🔒',
-      title: 'Immutable Audit Trail',
-      description: 'Every action is SHA-256 hashed and stored immutably. No tampering possible.',
-    },
-    {
-      icon: '👥',
-      title: 'Role-Based Access',
-      description: 'Admin, Officer, and Auditor roles with granular permissions powered by JWT authentication.',
+      icon: '🏢',
+      title: 'Institutional Sync',
+      description: 'Unified oversight layer bridging Ministry field data with National Audit Authority standards for 100% transparency.',
     },
   ];
 
-  return (
-    <div className="min-h-screen bg-gradient-hero overflow-hidden">
-      {/* ── Navigation ──────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 nav-blur">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-rakshak-blue to-rakshak-saffron rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">R</span>
-            </div>
-            <div>
-              <span className="font-bold text-rakshak-blue text-lg">RAKSHAK</span>
-              <span className="text-xs text-slate-500 ml-2 hidden sm:inline">Governance Integrity System</span>
-            </div>
-          </div>
+  const modules = [
+    { title: 'Budget Oversight', sub: 'Real-time fund tracking vs utilization', icon: '💎' },
+    { title: 'Material Audit', sub: 'AI quality verification of procurement', icon: '🧱' },
+    { title: 'Policy Simulation', sub: 'Impact analysis of governance directives', icon: '📜' },
+    { title: 'Anti-Corruption AI', sub: 'Pattern detection for financial leakages', icon: '⚖️' },
+  ];
 
-          <div className="flex items-center gap-6">
-            <a href="#features" className="text-slate-600 hover:text-rakshak-blue text-sm transition-colors hidden md:block">
-              Features
-            </a>
-            <a href="#stats" className="text-slate-600 hover:text-rakshak-blue text-sm transition-colors hidden md:block">
-              Impact
-            </a>
-            <Link href="/login">
-              <button className="px-4 py-2 rounded-lg border border-rakshak-blue/20 text-rakshak-blue text-sm font-medium hover:bg-rakshak-blue hover:text-white transition-all duration-200">
-                Sign In
-              </button>
-            </Link>
+  return (
+    <div className="min-h-screen bg-[#f1f4f9] overflow-hidden selection:bg-rakshak-blue/20">
+      <div className="fixed top-0 left-0 right-0 z-[100]">
+        <IntegrityTicker />
+      </div>
+      
+      {/* iOS Style Nav */}
+      <nav className="fixed top-12 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl rounded-3xl bg-white/40 backdrop-blur-3xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)] h-16 md:h-20 flex items-center justify-between px-4 md:px-10 transition-all hover:bg-white/60">
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-rakshak-blue to-rakshak-saffron rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg transform active:scale-95 transition-transform cursor-pointer">
+            <span className="text-white text-lg md:text-xl font-black">R</span>
+          </div>
+          <span className="font-black text-rakshak-navy text-base md:text-xl tracking-tighter">RAKSHAK</span>
+        </div>
+        <div className="flex items-center gap-3 md:gap-8">
+          <div className="hidden lg:flex items-center gap-10">
+             {['Solutions', 'Infrastructure', 'Audit Trial', 'Security'].map(item => (
+                <Link key={item} href="#" className="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-rakshak-blue transition-colors">{item}</Link>
+             ))}
+          </div>
+          <div className="w-px h-6 bg-slate-200 hidden lg:block" />
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link href="/login" className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-600 hover:text-rakshak-blue transition-colors whitespace-nowrap">Sign In</Link>
             <Link href="/dashboard">
-              <button className="px-4 py-2 rounded-lg bg-rakshak-blue text-white text-sm font-medium hover:bg-rakshak-navy transition-all duration-200 hidden sm:block">
-                Dashboard →
+              <button className="px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl bg-rakshak-navy text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-2xl hover:bg-black active:scale-95 transition-all flex items-center gap-2 group whitespace-nowrap overflow-hidden">
+                <span className="hidden sm:inline">Launch Platform</span>
+                <span className="sm:hidden">Launch</span>
+                 <ArrowRight className="w-3 h-3 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero Section ────────────────────────────────────────── */}
-      <motion.section
-        style={{ opacity: heroOpacity, y: heroY }}
-        className="relative min-h-screen flex items-center pt-16"
-      >
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center py-20">
-          {/* Left: Text */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-full px-4 py-1.5 mb-6"
-            >
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse-slow" />
-              <span className="text-blue-700 text-sm font-medium">Live Monitoring Active</span>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-5xl lg:text-6xl font-bold text-rakshak-navy leading-tight mb-6"
-            >
-              From Blind Execution
-              <br />
-              <span className="bg-gradient-to-r from-rakshak-saffron to-yellow-500 bg-clip-text text-transparent">
-                to Verified Governance
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center pt-32 pb-20">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            style={{ opacity: heroOpacity, y: heroY }} 
+            className="relative z-10 text-center lg:text-left flex flex-col items-center lg:items-start"
+          >
+            <div className="flex items-center gap-3 mb-6 md:mb-10 bg-white/50 backdrop-blur-xl px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-white/20 w-fit shadow-sm overflow-hidden">
+               <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="Emblem" className="w-4 h-4 md:w-5 md:h-5 grayscale opacity-70" />
+               <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.15em] md:tracking-[0.2em] text-[#1a1a1a] whitespace-nowrap">Official Infrastructure Oversight Portal</span>
+            </div>
+            
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl xl:text-9xl font-black text-[#0f172a] leading-[0.9] lg:leading-[0.85] mb-8 md:mb-10 tracking-tight lg:tracking-[-0.05em]">
+              Verified<br/>
+              Governance,<br/>
+              <span className="bg-gradient-to-r from-rakshak-saffron via-orange-500 to-yellow-500 bg-clip-text text-transparent italic">
+                Autonomous.
               </span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-xl text-slate-600 mb-8 leading-relaxed"
-            >
-              RAKSHAK is India&apos;s first autonomous infrastructure monitoring system. Every project, every rupee, every milestone — tracked in real-time with AI-powered risk intelligence.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex flex-wrap gap-4"
-            >
-              <Link href="/dashboard">
-                <button className="px-8 py-4 bg-rakshak-blue text-white rounded-xl font-semibold text-lg hover:bg-rakshak-navy transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-                  Launch Dashboard
+            </h1>
+            <p className="text-lg md:text-xl text-slate-500 mb-10 md:mb-14 leading-relaxed max-w-lg font-medium">
+              India&apos;s first autonomous integrity framework. Live satellite-synced auditing of over <span className="text-rakshak-navy font-black border-b-2 border-rakshak-saffron/30">₹42 Lakh Cr</span> in national assets.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 md:gap-8 w-full sm:w-auto">
+              <Link href="/dashboard" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto px-8 md:px-12 py-5 md:py-6 bg-rakshak-navy text-white rounded-[1.5rem] md:rounded-[2rem] font-black text-xs md:text-sm shadow-[0_20px_40px_rgba(15,23,42,0.3)] hover:bg-black transition-all hover:-translate-y-2 border-b-4 md:border-b-8 border-rakshak-blue active:translate-y-0 active:border-b-0 uppercase tracking-widest">
+                  Access Secure Portal
                 </button>
               </Link>
-              <Link href="/login">
-                <button className="px-8 py-4 bg-white text-rakshak-blue rounded-xl font-semibold text-lg border border-rakshak-blue/20 hover:border-rakshak-blue/40 transition-all duration-200 shadow-card hover:shadow-card-hover hover:-translate-y-0.5">
-                  Sign In →
-                </button>
-              </Link>
-            </motion.div>
-
-            {/* Trust indicators */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="mt-12 flex items-center gap-6 flex-wrap"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 text-xs">✓</span>
-                </div>
-                <span className="text-slate-500 text-sm">PostGIS verified</span>
+              <div className="flex items-center justify-center gap-4 md:gap-6 px-6 md:px-8 py-4 md:py-5 bg-white/40 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2rem] border border-white/20 shadow-sm w-full sm:w-auto">
+                 <div className="flex -space-x-3 md:-space-x-4 shrink-0">
+                    {[1,2,3,4].map(i => <div key={i} className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-200 border-2 md:border-4 border-white shadow-xl" />)}
+                 </div>
+                 <div className="text-left">
+                    <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Audit Reach</p>
+                    <p className="text-xs md:text-sm font-black text-rakshak-navy uppercase">14.2K+ Registered Officers</p>
+                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 text-xs">✓</span>
-                </div>
-                <span className="text-slate-500 text-sm">SHA-256 immutable logs</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 text-xs">✓</span>
-                </div>
-                <span className="text-slate-500 text-sm">XGBoost AI engine</span>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Right: 3D Globe */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="relative h-[500px] lg:h-[600px]"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-transparent rounded-3xl" />
+            </div>
+          </motion.div>
+          
+          <div className="h-[350px] sm:h-[500px] lg:h-[700px] relative mt-10 lg:mt-0">
             <IndiaGlobe />
-
-            {/* Floating cards */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 4, repeat: Infinity }}
-              className="absolute top-8 right-4 glass-card p-4 max-w-[180px]"
-            >
-              <div className="text-xs text-slate-500 mb-1">National Integrity Score</div>
-              <div className="text-2xl font-bold text-green-600">84.6%</div>
-              <div className="text-xs text-green-500 mt-1">↑ 2.3% this week</div>
-            </motion.div>
-
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 3.5, repeat: Infinity, delay: 0.5 }}
-              className="absolute bottom-16 left-4 glass-card p-4 max-w-[190px]"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <div className="text-xs text-red-600 font-medium">ALERT</div>
-              </div>
-              <div className="text-xs text-slate-700">NH-44 evidence gap: 18 days</div>
-            </motion.div>
-          </motion.div>
+            {/* Background Halo */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-blue-400/10 rounded-full blur-[80px] md:blur-[120px] -z-10 animate-pulse" />
+          </div>
         </div>
-      </motion.section>
+      </section>
 
-      {/* ── Stats Section ────────────────────────────────────────── */}
-      <section id="stats" className="py-12 md:py-20 px-6 bg-white/50">
+      {/* Dynamic News Feed News (iOS System Style) */}
+      <section className="py-20 bg-white/30 backdrop-blur-sm border-y border-white selection:text-white selection:bg-rakshak-blue">
+         <div className="max-w-7xl mx-auto px-6 mb-12">
+            <div className="flex items-center justify-between">
+               <h2 className="text-xs font-black uppercase tracking-[0.4em] text-slate-400 flex items-center gap-4">
+                  <div className="w-12 h-[2px] bg-slate-200" />
+                  Live Audit Intelligence (LAI™)
+               </h2>
+               <div className="flex items-center gap-2 text-[10px] font-black uppercase text-rakshak-blue tracking-widest bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                  Real-time Sync Active
+               </div>
+            </div>
+         </div>
+         <div className="flex gap-8 px-6 overflow-hidden relative">
+            <motion.div 
+               animate={{ x: ["0%", "-50%"] }}
+               transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+               className="flex gap-8 whitespace-nowrap"
+            >
+               {[1,2,3,4,5].map((i) => (
+                  <div key={i} className="flex gap-8">
+                     {[
+                        { title: "N-W Corridor Ph: IV", status: "Audit Passed", risk: "2.4%", color: "green" },
+                        { title: "Mumbai Sewage Plant", status: "Anomalies Found", risk: "48.2%", color: "red" },
+                        { title: "Gujarat Solar Hub", status: "Verification Sync", risk: "1.0%", color: "green" },
+                        { title: "Assam Bridge B22", status: "Integrity Alert", risk: "18.5%", color: "yellow" },
+                     ].map((item, idx) => (
+                        <div key={idx} className="flex-shrink-0 w-80 p-8 glass-card bg-white border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.03)] group hover:border-rakshak-blue transition-all cursor-default relative overflow-hidden">
+                           <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-rakshak-blue/5 to-transparent rounded-bl-3xl" />
+                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center justify-between">
+                              {item.title}
+                              <span className={`w-2 h-2 rounded-full ${item.color === 'green' ? 'bg-green-500' : item.color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                           </p>
+                           <h4 className="text-lg font-black text-rakshak-navy mb-2 group-hover:text-rakshak-blue transition-colors">{item.status}</h4>
+                           <div className="flex items-center justify-between">
+                              <span className="text-[10px] uppercase font-bold text-slate-400">Integrity Risk</span>
+                              <span className={`text-sm font-black ${item.color === 'green' ? 'text-green-600' : 'text-red-600'}`}>{item.risk}</span>
+                           </div>
+                           <div className="h-1 bg-slate-50 mt-4 rounded-full overflow-hidden">
+                              <div className={`h-full ${item.color === 'green' ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: item.risk }} />
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               ))}
+            </motion.div>
+         </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-10 md:mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-rakshak-navy mb-4">
-              Governance at National Scale
-            </h2>
-            <p className="text-slate-600 text-base md:text-lg">Real numbers. Real impact.</p>
-          </motion.div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-16">
+            {stats.map((s, i) => (
+              <motion.div 
+                key={s.label}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, type: "spring", stiffness: 100 }}
+                className="text-center group"
+              >
+                <div className="text-7xl mb-10 group-hover:scale-110 transition-transform duration-500">{s.icon}</div>
+                <div className="text-5xl font-black text-[#0f172a] mb-4 tracking-tighter">
+                  <AnimatedCounter target={s.value} prefix={s.prefix} suffix={s.suffix} />
+                </div>
+                <div className="text-slate-400 font-black text-[11px] tracking-[0.4em] uppercase">{s.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, i) => (
+      {/* Oversight Modules Grid */}
+      <section className="py-24 px-6 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col items-center mb-16 text-center">
+            <h2 className="text-xs font-black uppercase text-rakshak-blue tracking-[0.3em] md:tracking-[0.5em] mb-4">Core Intelligence Nodes</h2>
+            <p className="text-3xl md:text-4xl font-extrabold text-rakshak-navy tracking-tight max-w-2xl px-4">
+              Specialized Modules for <span className="text-transparent bg-clip-text bg-gradient-to-r from-rakshak-blue to-blue-400">Total Asset Integrity</span>
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {modules.map((m, i) => (
               <motion.div
-                key={stat.label}
+                key={m.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="glass-card p-8 text-center"
+                className="glass-card p-8 md:p-10 flex flex-col items-center text-center gap-6 hover:border-rakshak-blue transition-all"
               >
-                <div className="text-4xl mb-3">{stat.icon}</div>
-                <div className="text-3xl lg:text-4xl font-bold text-rakshak-blue mb-2">
-                  <AnimatedCounter
-                    target={stat.value}
-                    prefix={stat.prefix}
-                    suffix={stat.suffix}
-                  />
+                <div className="text-3xl md:text-4xl">{m.icon}</div>
+                <div>
+                   <h4 className="font-bold text-rakshak-navy text-base md:text-lg mb-2">{m.title}</h4>
+                   <p className="text-[10px] md:text-xs text-slate-400 font-medium leading-relaxed">{m.sub}</p>
                 </div>
-                <div className="text-slate-500 text-sm">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Features Section ─────────────────────────────────────── */}
-      <section id="features" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold text-rakshak-navy mb-4">
-              Six Pillars of Integrity
-            </h2>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              Every layer of RAKSHAK is engineered to ensure accountability cannot be faked.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f, i) => (
-              <FeatureCard key={f.title} {...f} delay={i * 0.1} />
-            ))}
-          </div>
+      {/* Feature Section with Glass Cards */}
+      <section className="py-32 px-6 bg-gradient-to-b from-[#f1f4f9] to-[#ffffff]">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-10">
+          {features.map((f, i) => (
+            <FeatureCard key={f.title} {...f} delay={i * 0.1} />
+          ))}
         </div>
       </section>
 
-      {/* ── Data Flow Section ────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-gradient-to-b from-white/30 to-blue-50/50">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold text-rakshak-navy mb-4">How It Works</h2>
-          </motion.div>
-
-          <div className="flex flex-col gap-6">
-            {[
-              { step: '01', title: 'Admin Creates Project', desc: 'Define project with GPS location, budget, deadline, milestones, contractor', icon: '👨‍💼' },
-              { step: '02', title: 'Officer Uploads Evidence', desc: 'Geo-tagged photos/videos uploaded from field via mobile-friendly portal', icon: '📸' },
-              { step: '03', title: 'System Verifies GPS + Hash', desc: 'EXIF data extracted, location cross-checked, SHA-256 computed for deduplication', icon: '🔍' },
-              { step: '04', title: 'AI Recalculates Risk', desc: 'XGBoost model scores project on 5 dimensions and updates risk level', icon: '🤖' },
-              { step: '05', title: 'Dashboard Updates Live', desc: 'WebSockets push risk changes, map updates, alerts fire in real-time', icon: '⚡' },
-            ].map((item, i) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-card p-6 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6"
-              >
-                <div className="w-14 h-14 bg-rakshak-blue/10 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
-                  {item.icon}
+      <footer className="py-20 px-6 bg-white border-t border-slate-100 mt-20">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center lg:items-start gap-16 md:gap-20">
+          <div className="flex items-center gap-4 text-center lg:text-left flex-col lg:flex-row">
+             <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center">
+                <span className="text-white font-black">R</span>
+             </div>
+             <div>
+                <p className="font-black text-rakshak-navy uppercase tracking-tighter text-2xl lg:text-lg">RAKSHAK INTEGRITY</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] leading-none mt-1">Powered by National Audit Labs</p>
+             </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-12 md:gap-24 text-center sm:text-left">
+             <div className="space-y-6">
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.25em]">Protocol Hub</p>
+                <div className="flex flex-col gap-3">
+                   {['Documentation', 'API Access', 'Audit Logs', 'Whitepaper'].map(item => (
+                      <Link key={item} href="#" className="text-xs font-bold text-slate-600 hover:text-rakshak-blue transition-colors uppercase tracking-widest">{item}</Link>
+                   ))}
                 </div>
-                <div className="flex-1">
-                  <div className="flex flex-col sm:flex-row items-center gap-3 mb-1">
-                    <span className="text-xs font-mono text-rakshak-saffron font-bold">{item.step}</span>
-                    <h3 className="font-semibold text-rakshak-navy">{item.title}</h3>
-                  </div>
-                  <p className="text-slate-500 text-sm">{item.desc}</p>
-                </div>
-                {i < 4 && (
-                  <div className="hidden sm:block text-slate-300 text-xl">↓</div>
-                )}
-              </motion.div>
-            ))}
+             </div>
+             <div className="space-y-6">
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.25em]">Verification Node</p>
+                <p className="text-xs font-black text-rakshak-navy uppercase">SHA-256 Verified Trail</p>
+                <p className="text-xs font-bold text-slate-400 leading-relaxed uppercase tracking-widest">Ministry of Integrity<br/>New Delhi, IN 110001</p>
+             </div>
           </div>
         </div>
-      </section>
-
-      {/* ── CTA Section ──────────────────────────────────────────── */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="glass-card p-16"
-          >
-            <div className="text-5xl mb-6">🇮🇳</div>
-            <h2 className="text-4xl font-bold text-rakshak-navy mb-4">
-              Integrity is not optional.
-              <br />
-              It is infrastructure.
-            </h2>
-            <p className="text-slate-600 text-lg mb-10">
-              Join the mission to ensure every rupee of public money reaches its intended purpose.
-            </p>
-            <div className="flex gap-4 justify-center flex-wrap">
-              <Link href="/dashboard">
-                <button className="px-10 py-4 bg-rakshak-blue text-white rounded-xl font-semibold text-lg hover:bg-rakshak-navy transition-all duration-200 shadow-lg hover:-translate-y-0.5">
-                  Access Dashboard
-                </button>
-              </Link>
-              <Link href="/login">
-                <button className="px-10 py-4 bg-white text-rakshak-blue rounded-xl font-semibold text-lg border border-rakshak-blue/20 hover:border-rakshak-blue/40 transition-all duration-200 shadow-card hover:-translate-y-0.5">
-                  Government Login
-                </button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Footer ───────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-200 py-8 px-6 bg-white/80">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-gradient-to-br from-rakshak-blue to-rakshak-saffron rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">R</span>
-            </div>
-            <span className="font-bold text-rakshak-blue">RAKSHAK</span>
-          </div>
-          <p className="text-slate-400 text-sm">
-            Autonomous Governance Integrity System © 2024
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-slate-500 text-sm">System Online</span>
-          </div>
+        <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6 opacity-30 text-center md:text-left">
+          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] md:tracking-[0.5em]">NIC-GOV-SECURED-ENVIRONMENT</span>
+          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] md:tracking-widest">RAKSHAK-V2.4.0-PRIME</span>
         </div>
       </footer>
     </div>

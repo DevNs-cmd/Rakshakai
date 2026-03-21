@@ -51,3 +51,23 @@ docker-compose*
 .idea/
 *.swp
 *.swo
+
+# Python Bytecode and Cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyd
+.Python
+
+# Logs and Runtime Files
+*.log
+logs/
+.pytest_cache/
+.coverage
+htmlcov/
+backend/*.log
+backend/*.pkl
+backend/output.*
+backend/backend_log.txt
+backend/rakshak.log
+backend/test_connect.py

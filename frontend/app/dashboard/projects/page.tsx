@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api';
-import { Project, ProjectStatus, RiskLevel } from '@/lib/types';
+import { Project } from '@/lib/types';
 import Link from 'next/link';
 import { 
   Search, 
@@ -13,12 +13,11 @@ import {
   Table as TableIcon, 
   Grid as GridIcon,
   RefreshCw,
-  Building2,
-  AlertTriangle,
-  Clock,
-  ArrowUpDown
+  Building2
 } from 'lucide-react';
-import { format } from 'date-fns';
+import Glass3D from '@/components/Glass3D';
+// Remove unused import { format } from 'date-fns';
+
 
 export default function ProjectList() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -145,7 +144,7 @@ export default function ProjectList() {
           {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-64 bg-slate-200 rounded-3xl" />)}
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 perspective-1000">
           <AnimatePresence>
             {filteredProjects.map((p, i) => (
               <motion.div
@@ -154,57 +153,59 @@ export default function ProjectList() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Link href={`/dashboard/projects/${p.id}`}>
-                  <div className="glass-card p-8 bg-white border border-slate-100 group hover:shadow-card-hover transition-all h-full flex flex-col">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${
-                        p.risk_level === 'green' ? 'bg-green-100 text-green-700' :
-                        p.risk_level === 'yellow' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700 font-bold animate-pulse'
-                      }`}>
-                        {p.risk_level} Risk Level
-                      </div>
-                      <span className="text-[10px] text-slate-300 font-mono font-bold tracking-tighter">#{p.id.split('-')[0]}</span>
-                    </div>
-
-                    <h3 className="text-xl font-black text-rakshak-navy mb-3 leading-tight group-hover:text-rakshak-blue transition-colors line-clamp-2">
-                      {p.name}
-                    </h3>
-                    
-                    <div className="space-y-3 mb-8">
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-xs font-bold">{p.state} • {p.district}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <IndianRupee className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-xs font-bold">{(p.budget / 10000000).toFixed(1)} Cr Total Budget</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-xs font-bold truncate max-w-[200px]">{p.contractor?.name}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-auto pt-6 border-t border-slate-50 space-y-3">
-                      <div className="flex justify-between items-end">
-                        <div>
-                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Infrastructure Progress</p>
-                          <p className="text-lg font-black text-rakshak-navy">{p.progress_percent}%</p>
+                <Glass3D intensity={15}>
+                  <Link href={`/dashboard/projects/${p.id}`}>
+                    <div className="glass-card p-8 bg-white border border-slate-100 group hover:shadow-card-hover transition-all h-full flex flex-col overflow-hidden">
+                      <div className="flex justify-between items-start mb-6">
+                        <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${
+                          p.risk_level === 'green' ? 'bg-green-100 text-green-700' :
+                          p.risk_level === 'yellow' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700 font-bold animate-pulse'
+                        }`}>
+                          {p.risk_level} Risk Level
                         </div>
-                        <div className="p-2 bg-slate-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                          <ChevronRight className="w-5 h-5 text-rakshak-blue" />
+                        <span className="text-[10px] text-slate-300 font-mono font-bold tracking-tighter">#{p.id.split('-')[0]}</span>
+                      </div>
+
+                      <h3 className="text-xl font-black text-rakshak-navy mb-3 leading-tight group-hover:text-rakshak-blue transition-colors line-clamp-2">
+                        {p.name}
+                      </h3>
+                      
+                      <div className="space-y-3 mb-8">
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="text-xs font-bold">{p.state} • {p.district}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <IndianRupee className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="text-xs font-bold">{(p.budget / 10000000).toFixed(1)} Cr Total Budget</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="text-xs font-bold truncate max-w-[200px]">{p.contractor?.name}</span>
                         </div>
                       </div>
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${p.progress_percent}%` }}
-                          className={`h-full ${p.status === 'delayed' ? 'bg-red-500' : 'bg-rakshak-blue'} shadow-lg`} 
-                        />
+
+                      <div className="mt-auto pt-6 border-t border-slate-50 space-y-3">
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Infrastructure Progress</p>
+                            <p className="text-lg font-black text-rakshak-navy">{p.progress_percent}%</p>
+                          </div>
+                          <div className="p-2 bg-slate-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                            <ChevronRight className="w-5 h-5 text-rakshak-blue" />
+                          </div>
+                        </div>
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${p.progress_percent}%` }}
+                            className={`h-full ${p.status === 'delayed' ? 'bg-red-500' : 'bg-rakshak-blue'} shadow-lg`} 
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </Glass3D>
               </motion.div>
             ))}
           </AnimatePresence>
