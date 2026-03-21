@@ -2,11 +2,12 @@
 
 ## Steps Progress
 - [x] Updated .gitignore for Python/logs/pycache
-- [ ] git add .
-- [ ] git commit -m "Full Rakshak AI updates: backend/frontend improvements, cleaned ignores"
-- [ ] git remote add rakshakai https://github.com/DevNs-cmd/Rakshakai.git || git remote set-url rakshakai https://github.com/DevNs-cmd/Rakshakai.git
-- [ ] git push -u rakshakai main
-- [ ] Verify push on GitHub
+- [x] git add .
+- [x] git commit -m "Full Rakshak AI updates: backend/frontend improvements, cleaned ignores"
+- [x] git remote add rakshakai https://github.com/DevNs-cmd/Rakshakai.git
+- [x] git push -u rakshakai main (https://github.com/DevNs-cmd/Rakshakai)
+- [x] Vercel CLI ready v50.33.1, logged in
+- [ ] Vercel frontend deploy from frontend/ (Next.js)
 
 ## Notes
 - Existing remote: Rakshak-Ai (capital A)
