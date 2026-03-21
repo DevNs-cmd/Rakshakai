@@ -116,10 +116,11 @@ const fetchData = useCallback(async (isRefresh = false) => {
         name: 'Delhi-Mumbai Expressway',
         state: 'Maharashtra',
         risk_level: 'green',
+        risk_score: 12,
         budget: 12000000000,
         progress_percent: 78,
-        lat: 19.0760,
-        lon: 72.8777,
+        latitude: 19.0760,
+        longitude: 72.8777,
         status: 'active'
       },
       {
@@ -127,10 +128,11 @@ const fetchData = useCallback(async (isRefresh = false) => {
         name: 'PM Gati Shakti Terminal',
         state: 'Gujarat',
         risk_level: 'yellow',
+        risk_score: 48,
         budget: 8500000000,
         progress_percent: 45,
-        lat: 23.0225,
-        lon: 72.5714,
+        latitude: 23.0225,
+        longitude: 72.5714,
         status: 'delayed'
       }
     ]);
@@ -138,12 +140,13 @@ const fetchData = useCallback(async (isRefresh = false) => {
       {
         id: 'alert-1',
         title: 'Material Anomaly - Cement Grade',
-        description: 'M20 cement detected in M25 spec bridge pour. Vendor: ABC Infra',
+        message: 'M20 cement detected in M25 spec bridge pour. Vendor: ABC Infra',
         project_id: 'proj-001',
         severity: 'high',
         is_read: false,
-        timestamp: '2024-06-15T10:30:00Z',
-        type: 'evidence_failure'
+        is_resolved: false,
+        created_at: '2024-06-15T10:30:00Z',
+        alert_type: 'budget_overrun'
       }
     ]);
   } finally {
