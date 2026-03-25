@@ -57,8 +57,7 @@ export default function DashboardStatsGrid({ stats }: Props) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="glass-card p-6 border-l-4 group bg-white shadow-card hover:shadow-card-hover overflow-hidden"
-            style={{ borderLeftColor: card.color.replace('bg-', '') }}
+            className={"glass-card p-6 border-l-4 group bg-white shadow-card hover:shadow-card-hover overflow-hidden border-" + card.color.replace('bg-', '')}
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`p-2.5 rounded-xl ${card.color.replace('bg-', 'bg-')}/10 flex items-center justify-center transition-transform group-hover:scale-110 duration-300`}>

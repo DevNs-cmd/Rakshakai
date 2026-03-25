@@ -39,7 +39,7 @@ export default function IntegrityTicker() {
         </motion.div>
       </div>
 
-      <div className="bg-rakshak-navy px-4 h-full hidden sm:flex items-center gap-2 shrink-0 border-l border-white/10 text-[9px] font-mono text-blue-400">
+      <div suppressHydrationWarning className="bg-rakshak-navy px-4 h-full hidden sm:flex items-center gap-2 shrink-0 border-l border-white/10 text-[9px] font-mono text-blue-400">
         UTC: {new Date().toISOString().split('T')[0]} 
       </div>
     </div>

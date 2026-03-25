@@ -7,15 +7,13 @@ import {
   Building2, 
   Search, 
   Filter, 
-  TrendingUp, 
   ShieldAlert, 
   CheckCircle2, 
   Star, 
-  ExternalLink,
   ChevronRight,
   UserCheck
 } from 'lucide-react';
-import Link from 'next/link';
+
 
 export default function ContractorsPage() {
   const [contractors, setContractors] = useState<Contractor[]>([]);

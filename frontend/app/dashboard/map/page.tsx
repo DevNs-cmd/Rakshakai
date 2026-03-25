@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import DashboardMap from '@/components/DashboardMap';
 import { api } from '@/lib/api';
 import { ProjectMapPoint } from '@/lib/types';
-import { ArrowLeft, Layers, Filter, ShieldCheck, Maximize2 } from 'lucide-react';
+import { ArrowLeft, Layers, ShieldCheck, Maximize2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function FullMapPage() {

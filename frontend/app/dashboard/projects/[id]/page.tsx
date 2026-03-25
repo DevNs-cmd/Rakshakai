@@ -3,13 +3,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api';
-import { Project, Evidence, RiskHistoryPoint, Milestone } from '@/lib/types';
+import { Project, Evidence, RiskHistoryPoint } from '@/lib/types';
 import RiskGauge from '@/components/RiskGauge';
 import EvidenceUpload from '@/components/EvidenceUpload';
 import Glass3D from '@/components/Glass3D';
 import { 
   ArrowLeft, 
-  MapPin, 
   IndianRupee, 
   Calendar, 
   User, 
@@ -22,6 +21,13 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
+
+interface SimResult {
+  message: string;
+  original_risk_score: number;
+  new_risk_score: number;
+}
+
 import { 
   AreaChart, 
   Area, 
@@ -40,7 +46,7 @@ export default function ProjectDetail() {
   const [riskHistory, setRiskHistory] = useState<RiskHistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [simulating, setSimulating] = useState(false);
-  const [simResult, setSimResult] = useState<any>(null);
+  const [simResult, setSimResult] = useState<SimResult | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -262,7 +268,7 @@ export default function ProjectDetail() {
           <div className="glass-card p-8 bg-white border border-slate-100 shadow-card">
             <h3 className="font-black text-rakshak-navy uppercase tracking-widest text-xs mb-8">Auditable Milestones</h3>
             <div className="space-y-4">
-              {project.milestones?.sort((a, b) => a.order_index - b.order_index).map((m, i) => (
+              {project.milestones?.sort((a, b) => a.order_index - b.order_index).map((m) => (
                 <div key={m.id} className={`p-5 rounded-2xl border transition-all flex items-center justify-between group ${m.is_completed ? 'bg-green-50/50 border-green-100' : 'bg-slate-50/50 border-slate-100'}`}>
                   <div className="flex items-center gap-5">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center border font-black text-sm ${m.is_completed ? 'bg-green-100 border-green-200 text-green-700' : 'bg-white border-slate-200 text-slate-400'}`}>
@@ -393,7 +399,7 @@ export default function ProjectDetail() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-slate-50 rounded-2xl text-center">
                 <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Historical Risk</p>
-                <p className={`text-lg font-bold ${project.contractor?.risk_score! > 50 ? 'text-red-500' : 'text-green-600'}`}>
+                <p className={`text-lg font-bold ${(project.contractor?.risk_score ?? 0) > 50 ? 'text-red-500' : 'text-green-600'}`}>
                   {project.contractor?.risk_score}%
                 </p>
               </div>

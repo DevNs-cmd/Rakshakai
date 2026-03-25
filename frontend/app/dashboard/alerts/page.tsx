@@ -5,8 +5,6 @@ import { api } from '@/lib/api';
 import { Alert } from '@/lib/types';
 import { 
   BellRing, 
-  Search, 
-  Filter, 
   RefreshCw, 
   ShieldAlert, 
   CheckCircle2, 

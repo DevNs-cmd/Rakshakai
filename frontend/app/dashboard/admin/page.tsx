@@ -2,22 +2,17 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api';
-import { Contractor, Project, User } from '@/lib/types';
+import { Contractor, Project } from '@/lib/types';
 import { 
-  ShieldCheck, 
   Building2, 
   UserPlus, 
   PlusCircle, 
   History, 
   MapPin, 
   IndianRupee, 
-  Calendar,
   Layers,
-  Search,
-  CheckCircle2,
   Trash2,
-  Settings,
-  AlertCircle
+  Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -161,7 +156,11 @@ export default function AdminPortal() {
 
       {/* ── Tab Content ───────────────────────────────────────────── */}
       <div className="space-y-8">
-        {activeTab === 'projects' && (
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-48 bg-slate-100 rounded-3xl" />)}
+          </div>
+        ) : activeTab === 'projects' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-black text-rakshak-navy tracking-tight">Project Registry</h2>

@@ -1,36 +1,28 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import { api } from '@/lib/api';
 import { DashboardStats } from '@/lib/types';
 import { 
-  BarChart4, 
-  Search, 
-  Filter, 
   TrendingUp, 
-  TrendingDown, 
-  CheckCircle2, 
   IndianRupee, 
   Target, 
-  Layers,
   ArrowRight,
   ShieldAlert,
   Calendar,
-  Layers as LayersIcon
+  Layers as LayersIcon,
+  Filter
 } from 'lucide-react';
 import { 
   AreaChart, 
   Area, 
   XAxis, 
   YAxis, 
-  CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
   BarChart, 
   Bar, 
-  Cell,
-  PieChart,
-  Pie
+  Cell
 } from 'recharts';
 
 const DUMMY_TIME_DATA = [
@@ -207,7 +199,7 @@ export default function AnalyticsPage() {
                  { label: 'Physical Compliance', value: 88.5, icon: LayersIcon, color: 'text-blue-500' },
                  { label: 'Reporting Velocity', value: 92.1, icon: TrendingUp, color: 'text-rakshak-saffron' },
                  { label: 'Integrity Rating', value: 91.8, icon: ShieldAlert, color: 'text-red-500' }
-              ].map((m, i) => (
+              ].map((m) => (
                  <div key={m.label} className="glass-card p-8 bg-white border border-slate-100 shadow-card rounded-3xl hover:translate-y-[-8px] transition-all duration-300 flex flex-col justify-between">
                     <m.icon className={`w-8 h-8 ${m.color} mb-6`} />
                     <div>

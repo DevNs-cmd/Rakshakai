@@ -35,12 +35,13 @@ import * as THREE from 'three';
 function RiskOrb({ score }: { score: number }) {
   const mountRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!mountRef.current) return;
+    const currentMount = mountRef.current;
+    if (!currentMount) return;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(120, 120);
-    mountRef.current.appendChild(renderer.domElement);
+    currentMount.appendChild(renderer.domElement);
 
     const geometry = new THREE.IcosahedronGeometry(1, 15);
     const material = new THREE.MeshPhongMaterial({
@@ -71,7 +72,7 @@ function RiskOrb({ score }: { score: number }) {
 
     return () => {
       renderer.dispose();
-      mountRef.current?.removeChild(renderer.domElement);
+      currentMount?.removeChild(renderer.domElement);
     };
   }, [score]);
 

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
-import { Loader2, ShieldCheck, Mail, Lock, ArrowRight, UserCheck, LogIn, Globe } from 'lucide-react';
+import { Loader2, ShieldCheck, Mail, Lock, ArrowRight, UserCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -34,8 +34,9 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Authentication failed. Please check credentials.');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { detail?: string } } };
+      setError(e.response?.data?.detail || 'Authentication failed. Please check credentials.');
     } finally {
       setIsLoading(false);
     }

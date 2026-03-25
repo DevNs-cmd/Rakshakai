@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import * as THREE from 'three';
 import { ArrowRight } from 'lucide-react';
@@ -53,9 +53,10 @@ function IndiaGlobe() {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!mountRef.current) return;
-    const w = mountRef.current.clientWidth;
-    const h = mountRef.current.clientHeight;
+    const currentMount = mountRef.current;
+    if (!currentMount) return;
+    const w = currentMount.clientWidth;
+    const h = currentMount.clientHeight;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
     camera.position.z = 3.2;
@@ -63,7 +64,7 @@ function IndiaGlobe() {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(w, h);
     renderer.setPixelRatio(window.devicePixelRatio);
-    mountRef.current.appendChild(renderer.domElement);
+    currentMount.appendChild(renderer.domElement);
 
     const loader = new THREE.TextureLoader();
     
@@ -158,7 +159,7 @@ function IndiaGlobe() {
       const ring = new THREE.Mesh(ringGeom, ringMat);
       ring.position.set(x, y, z).multiplyScalar(1.02);
       ring.lookAt(0, 0, 0);
-      (ring as any).isRing = true;
+      (ring as unknown as { isRing: boolean }).isRing = true;
       globeGroup.add(ring);
     });
 
@@ -168,7 +169,7 @@ function IndiaGlobe() {
       clouds.rotation.y += 0.0008;
       
       globeGroup.children.forEach(child => {
-        if ((child as any).isRing) {
+        if ((child as unknown as { isRing: boolean }).isRing) {
           const s = 1 + Math.sin(Date.now() * 0.004) * 0.4;
           child.scale.set(s, s, s);
           ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity = 1 - (s - 0.6);
@@ -191,8 +192,8 @@ function IndiaGlobe() {
     return () => {
       window.removeEventListener('resize', handleResize);
       renderer.dispose();
-      if (mountRef.current?.contains(renderer.domElement)) {
-        mountRef.current.removeChild(renderer.domElement);
+      if (currentMount?.contains(renderer.domElement)) {
+        currentMount.removeChild(renderer.domElement);
       }
     };
   }, []);
