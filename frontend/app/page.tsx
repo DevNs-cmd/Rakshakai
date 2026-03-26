@@ -165,8 +165,8 @@ function IndiaGlobe() {
 
     const animate = () => {
       requestAnimationFrame(animate);
-      globeGroup.rotation.y += 0.0012;
-      clouds.rotation.y += 0.0008;
+      globeGroup.rotation.y += 0.004;
+      clouds.rotation.y += 0.003;
       
       globeGroup.children.forEach(child => {
         if ((child as unknown as { isRing: boolean }).isRing) {
@@ -207,6 +207,7 @@ function IndiaGlobe() {
   );
 }
 
+import Navbar from '@/components/Navbar';
 import Glass3D from '@/components/Glass3D';
 
 function FeatureCard({ icon, title, description, delay }: {
@@ -269,38 +270,13 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f1f4f9] overflow-hidden selection:bg-rakshak-blue/20">
+    <div className="min-h-screen bg-[#f1f4f9] overflow-hidden flex flex-col selection:bg-rakshak-blue/20">
       <div className="fixed top-0 left-0 right-0 z-[100]">
         <IntegrityTicker />
       </div>
       
-      {/* iOS Style Nav */}
-      <nav className="fixed top-12 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl rounded-3xl bg-white/40 backdrop-blur-3xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.05)] h-16 md:h-20 flex items-center justify-between px-4 md:px-10 transition-all hover:bg-white/60">
-        <div className="flex items-center gap-2 md:gap-4 shrink-0">
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-rakshak-blue to-rakshak-saffron rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg transform active:scale-95 transition-transform cursor-pointer">
-            <span className="text-white text-lg md:text-xl font-black">R</span>
-          </div>
-          <span className="font-black text-rakshak-navy text-base md:text-xl tracking-tighter">RAKSHAK</span>
-        </div>
-        <div className="flex items-center gap-3 md:gap-8">
-          <div className="hidden lg:flex items-center gap-10">
-             {['Solutions', 'Infrastructure', 'Audit Trial', 'Security'].map(item => (
-                <Link key={item} href="#" className="text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-rakshak-blue transition-colors">{item}</Link>
-             ))}
-          </div>
-          <div className="w-px h-6 bg-slate-200 hidden lg:block" />
-          <div className="flex items-center gap-2 md:gap-4">
-            <Link href="/login" className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-600 hover:text-rakshak-blue transition-colors whitespace-nowrap">Sign In</Link>
-            <Link href="/dashboard">
-              <button className="px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl bg-rakshak-navy text-white text-[10px] md:text-xs font-black uppercase tracking-widest shadow-2xl hover:bg-black active:scale-95 transition-all flex items-center gap-2 group whitespace-nowrap overflow-hidden">
-                <span className="hidden sm:inline">Launch Platform</span>
-                <span className="sm:hidden">Launch</span>
-                 <ArrowRight className="w-3 h-3 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* iOS Style Nav - Extracted and Fixed */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center pt-32 pb-20">
@@ -316,29 +292,29 @@ export default function LandingPage() {
                <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.15em] md:tracking-[0.2em] text-[#1a1a1a] whitespace-nowrap">Official Infrastructure Oversight Portal</span>
             </div>
             
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl xl:text-9xl font-black text-[#0f172a] leading-[0.9] lg:leading-[0.85] mb-8 md:mb-10 tracking-tight lg:tracking-[-0.05em]">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-[#0f172a] leading-[1.1] lg:leading-[0.95] mb-6 md:mb-8 tracking-tight lg:tracking-[-0.03em]">
               Verified<br/>
               Governance,<br/>
-              <span className="bg-gradient-to-r from-rakshak-saffron via-orange-500 to-yellow-500 bg-clip-text text-transparent italic">
+              <span className="bg-gradient-to-r from-[#1e3a8a] via-blue-600 to-[#ea580c] bg-clip-text text-transparent italic">
                 Autonomous.
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-500 mb-10 md:mb-14 leading-relaxed max-w-lg font-medium">
+            <p className="text-base md:text-xl text-slate-500 mb-8 md:mb-14 leading-relaxed max-w-lg font-medium">
               India&apos;s first autonomous integrity framework. Live satellite-synced auditing of over <span className="text-rakshak-navy font-black border-b-2 border-rakshak-saffron/30">₹42 Lakh Cr</span> in national assets.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 md:gap-8 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-8 w-full sm:w-auto">
               <Link href="/dashboard" className="w-full sm:w-auto">
-                <button className="w-full sm:w-auto px-8 md:px-12 py-5 md:py-6 bg-rakshak-navy text-white rounded-[1.5rem] md:rounded-[2rem] font-black text-xs md:text-sm shadow-[0_20px_40px_rgba(15,23,42,0.3)] hover:bg-black transition-all hover:-translate-y-2 border-b-4 md:border-b-8 border-rakshak-blue active:translate-y-0 active:border-b-0 uppercase tracking-widest">
+                <button className="w-full sm:w-auto px-8 md:px-12 py-4 md:py-6 bg-rakshak-navy text-white rounded-[1.2rem] md:rounded-[2rem] font-black text-[10px] md:text-sm shadow-[0_20px_40px_rgba(15,23,42,0.3)] hover:bg-black transition-all hover:-translate-y-2 border-b-4 md:border-b-8 border-rakshak-blue active:translate-y-0 active:border-b-0 uppercase tracking-widest">
                   Access Secure Portal
                 </button>
               </Link>
-              <div className="flex items-center justify-center gap-4 md:gap-6 px-6 md:px-8 py-4 md:py-5 bg-white/40 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2rem] border border-white/20 shadow-sm w-full sm:w-auto">
+              <div className="flex items-center justify-center gap-4 md:gap-6 px-6 md:px-8 py-3 md:py-5 bg-white/40 backdrop-blur-xl rounded-[1.2rem] md:rounded-[2rem] border border-white/20 shadow-sm w-full sm:w-auto">
                  <div className="flex -space-x-3 md:-space-x-4 shrink-0">
-                    {[1,2,3,4].map(i => <div key={i} className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-200 border-2 md:border-4 border-white shadow-xl" />)}
+                    {[1,2,3,4].map(i => <div key={i} className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-slate-200 border-2 md:border-4 border-white shadow-xl" />)}
                  </div>
                  <div className="text-left">
-                    <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Audit Reach</p>
-                    <p className="text-xs md:text-sm font-black text-rakshak-navy uppercase">14.2K+ Registered Officers</p>
+                    <p className="text-[7px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Audit Reach</p>
+                    <p className="text-[10px] md:text-sm font-black text-rakshak-navy uppercase">14.2K+ Registered Officers</p>
                  </div>
               </div>
             </div>
@@ -403,9 +379,9 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-32 px-6">
+      <section className="py-20 md:py-32 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16">
             {stats.map((s, i) => (
               <motion.div 
                 key={s.label}
@@ -415,11 +391,11 @@ export default function LandingPage() {
                 transition={{ delay: i * 0.1, type: "spring", stiffness: 100 }}
                 className="text-center group"
               >
-                <div className="text-7xl mb-10 group-hover:scale-110 transition-transform duration-500">{s.icon}</div>
-                <div className="text-5xl font-black text-[#0f172a] mb-4 tracking-tighter">
+                <div className="text-4xl md:text-7xl mb-4 md:mb-10 group-hover:scale-110 transition-transform duration-500">{s.icon}</div>
+                <div className="text-2xl md:text-5xl font-black text-[#0f172a] mb-2 md:mb-4 tracking-tighter">
                   <AnimatedCounter target={s.value} prefix={s.prefix} suffix={s.suffix} />
                 </div>
-                <div className="text-slate-400 font-black text-[11px] tracking-[0.4em] uppercase">{s.label}</div>
+                <div className="text-slate-400 font-black text-[9px] md:text-[11px] tracking-[0.2em] md:tracking-[0.4em] uppercase">{s.label}</div>
               </motion.div>
             ))}
           </div>

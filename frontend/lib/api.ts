@@ -24,6 +24,8 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
+        // Disabled strict 401 auth kicks to allow open platform access per user request
+        /*
         if (error.response?.status === 401) {
           if (typeof window !== 'undefined') {
             localStorage.removeItem('rakshak_token');
@@ -31,6 +33,7 @@ class ApiClient {
             window.location.href = '/login';
           }
         }
+        */
         return Promise.reject(error);
       }
     );

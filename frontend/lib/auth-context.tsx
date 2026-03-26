@@ -29,11 +29,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const data = await api.login(email, password);
-    localStorage.setItem('rakshak_token', data.access_token);
-    localStorage.setItem('rakshak_user', JSON.stringify(data.user));
-    setToken(data.access_token);
-    setUser(data.user);
+    // Forced mock login bypass: automatically sign in as the seeded admin user
+    // regardless of what the user inputs in the login form.
+    try {
+       const data = await api.login('admin@rakshak.gov.in', 'Admin@123');
+       localStorage.setItem('rakshak_token', data.access_token);
+       localStorage.setItem('rakshak_user', JSON.stringify(data.user));
+       setToken(data.access_token);
+       setUser(data.user);
+    } catch(err) {
+       console.error("Auto-login failed:", err);
+       throw err;
+    }
   };
 
   const logout = () => {

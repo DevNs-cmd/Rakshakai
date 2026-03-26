@@ -15,15 +15,8 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleGoogleSignIn = () => {
-    const width = 500;
-    const height = 600;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-    window.open(
-      'https://accounts.google.com/o/oauth2/auth', 
-      'Google Login', 
-      `width=${width},height=${height},top=${top},left=${left}`
-    );
+    // Redirect through the integrated auth-server handling Google OAuth logic 
+    window.location.href = 'http://localhost:3001/auth/google';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
