@@ -59,25 +59,25 @@ export default function AnalyticsPage() {
   }, [fetchData]);
 
   return (
-    <div className="p-10 space-y-10 min-h-screen pb-20">
+    <div className="p-4 sm:p-6 md:p-10 space-y-8 md:space-y-10 min-h-screen pb-24 md:pb-20">
       {/* ── Header ─────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
-        <div>
-           <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-4xl font-black text-rakshak-navy tracking-tight">National Integrity Analytics</h1>
-              <div className="bg-rakshak-navy text-white text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border border-rakshak-navy/10">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 md:gap-8 pb-6 border-b border-slate-100">
+        <div className="space-y-2">
+           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0f172a] tracking-tight uppercase">National Integrity Analytics</h1>
+              <div className="bg-[#0f172a] text-white text-[8px] md:text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-[0.2em] border border-[#0f172a]/10 w-fit">
                  Real-time Data Hub
               </div>
            </div>
-           <p className="text-slate-500 font-medium">Predictive modeling and performance tracking across {stats?.total_projects || '...'} national assets.</p>
+           <p className="text-slate-400 text-[10px] md:text-sm font-bold uppercase tracking-widest max-w-xl">Predictive modeling and performance tracking across {stats?.total_projects || '...'} national assets.</p>
         </div>
 
-        <div className="flex items-center gap-4">
-           <button className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:bg-slate-50 transition-all text-xs font-bold text-rakshak-navy leading-none">
+        <div className="flex items-center gap-3 md:gap-4 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+           <button className="flex items-center gap-2 px-6 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:bg-slate-50 transition-all text-[9.5px] md:text-xs font-black uppercase tracking-widest text-[#0f172a] leading-none whitespace-nowrap">
               <Calendar className="w-4 h-4" />
               Last Q2 Oct-Dec
            </button>
-           <button className="p-4 bg-rakshak-blue text-white rounded-2xl shadow-xl shadow-rakshak-blue/20 hover:bg-rakshak-navy transition-all">
+           <button className="p-4 bg-rakshak-blue text-white rounded-2xl shadow-xl shadow-rakshak-blue/20 hover:bg-black transition-all active:scale-95 shrink-0">
               <Filter className="w-5 h-5" />
            </button>
         </div>
@@ -88,22 +88,22 @@ export default function AnalyticsPage() {
            <div className="w-12 h-12 border-4 border-rakshak-blue border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="grid grid-cols-12 gap-10">
+        <div className="grid grid-cols-12 gap-6 md:gap-10">
            {/* Chart 1: Time Series */}
-           <div className="col-span-12 lg:col-span-8 glass-card p-10 bg-white border border-slate-100 shadow-card rounded-[2.5rem] relative overflow-hidden">
-              <div className="flex items-center justify-between mb-8 relative z-10">
-                 <div>
-                    <h3 className="text-lg font-black text-rakshak-navy uppercase tracking-widest border-l-4 border-rakshak-blue pl-4">Asset Integrity Index</h3>
-                    <p className="text-xs text-slate-400 font-bold ml-5 mt-1">Confidence Score Over Time (Verified Reporting)</p>
+           <div className="col-span-12 lg:col-span-8 glass-card p-6 md:p-10 bg-white border border-slate-100 shadow-card rounded-[2rem] md:rounded-[2.5rem] relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative z-10">
+                 <div className="space-y-1">
+                    <h3 className="text-sm md:text-lg font-black text-[#0f172a] uppercase tracking-widest border-l-4 border-rakshak-blue pl-4">Asset Integrity Index</h3>
+                    <p className="text-[9px] md:text-[10px] text-slate-400 font-black uppercase tracking-widest ml-5">Confidence Score Over Time (Verified Reporting)</p>
                  </div>
-                 <div className="flex gap-4">
+                 <div className="flex gap-4 ml-5 sm:ml-0">
                     <div className="flex items-center gap-2">
-                       <div className="w-3 h-3 rounded-full bg-rakshak-blue" />
-                       <span className="text-[10px] font-black uppercase text-slate-400">Integrity</span>
+                       <div className="w-2.5 h-2.5 rounded-full bg-rakshak-blue" />
+                       <span className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Integrity</span>
                     </div>
                     <div className="flex items-center gap-2">
-                       <div className="w-3 h-3 rounded-full bg-red-400 opacity-30" />
-                       <span className="text-[10px] font-black uppercase text-slate-400">Risk Variance</span>
+                       <div className="w-2.5 h-2.5 rounded-full bg-red-400 opacity-30" />
+                       <span className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">Risk Variance</span>
                     </div>
                  </div>
               </div>
@@ -144,9 +144,9 @@ export default function AnalyticsPage() {
            </div>
 
            {/* Chart 2: Projects by State */}
-           <div className="col-span-12 lg:col-span-4 glass-card p-10 bg-white border border-slate-100 shadow-card rounded-[2.5rem] flex flex-col items-center justify-center text-center">
-              <h3 className="text-lg font-black text-rakshak-navy uppercase tracking-widest mb-2 leading-none">Top Performance Regions</h3>
-              <p className="text-[10px] text-slate-400 font-bold mb-10">Asset density vs Compliance (Top 5 States)</p>
+           <div className="col-span-12 lg:col-span-4 glass-card p-6 md:p-10 bg-white border border-slate-100 shadow-card rounded-[2rem] md:rounded-[2.5rem] flex flex-col items-center justify-center text-center">
+              <h3 className="text-sm md:text-lg font-black text-[#0f172a] uppercase tracking-widest mb-2 leading-none">Top Performance Regions</h3>
+              <p className="text-[9px] md:text-[10px] text-slate-400 font-black uppercase tracking-widest mb-10">Asset density vs Compliance (Top 5 States)</p>
               
               <div className="h-[250px] w-full mb-8">
                  <ResponsiveContainer width="100%" height="100%">
@@ -174,18 +174,18 @@ export default function AnalyticsPage() {
            </div>
 
            {/* Row 2: Prediction Insights */}
-           <div className="col-span-12 lg:col-span-5 glass-card p-10 bg-rakshak-navy text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[400px]">
+           <div className="col-span-12 lg:col-span-5 glass-card p-6 md:p-10 bg-[#0f172a] text-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[400px]">
               <div>
-                 <Target className="w-12 h-12 text-rakshak-saffron mb-6" />
-                 <h3 className="text-3xl font-black tracking-tight leading-tight max-w-[280px]">AI-Forecasted Resource Deviations</h3>
-                 <p className="text-sm text-blue-300 mt-4 max-w-sm font-medium">Predictive model predicts a 14% increase in procurement anomalies for Southern rail projects across Q3.</p>
+                 <Target className="w-10 h-10 md:w-12 md:h-12 text-[#ea580c] mb-6" />
+                 <h3 className="text-2xl md:text-3xl font-black tracking-tight leading-tight max-w-[280px] uppercase">AI-Forecasted Resource Deviations</h3>
+                 <p className="text-xs md:text-sm text-blue-300 mt-4 max-w-sm font-bold uppercase tracking-widest leading-relaxed opacity-70">Predictive model predicts a {stats?.avg_delay_percent || '14'}% increase in procurement anomalies for Southern rail projects across Q3.</p>
               </div>
               <div className="pt-8 flex flex-col gap-4 border-t border-white/10 mt-8">
                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-black uppercase tracking-widest opacity-50">Model Confidence</span>
-                    <span className="text-xl font-black text-rakshak-saffron">98.2%</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">Model Confidence</span>
+                    <span className="text-xl font-black text-[#ea580c]">98.2%</span>
                  </div>
-                 <button className="w-full py-4 bg-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center gap-3">
+                 <button className="w-full py-4 bg-white/10 text-white rounded-2xl font-black text-[9px] uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center gap-3">
                     Download Prediction Deck
                     <ArrowRight className="w-4 h-4" />
                  </button>

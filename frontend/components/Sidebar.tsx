@@ -33,32 +33,39 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
+  const sidebarVariants = {
+    open: { x: 0 },
+    closed: { x: '-100%' }
+  };
+
   return (
     <>
       {/* Mobile Toggle */}
-      <div className="lg:hidden fixed top-14 right-4 z-[60]">
+      <div className="lg:hidden fixed top-12 right-4 z-[70]">
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="p-3 bg-rakshak-navy text-white rounded-xl shadow-lg border border-white/10"
+          className="p-2.5 bg-[#0f172a] text-white rounded-xl shadow-2xl border border-white/10 active:scale-95 transition-transform"
         >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
       {/* Sidebar Desktop/Mobile */}
       <motion.aside 
         initial={false}
-        animate={{ x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -300 : 0) }}
-        className={`fixed lg:static inset-y-0 left-0 w-80 h-screen bg-rakshak-navy/90 backdrop-blur-3xl text-white flex flex-col z-50 shadow-2xl transition-transform duration-300 border-r border-white/5`}
+        animate={isOpen ? "open" : "closed"}
+        variants={sidebarVariants}
+        className="fixed lg:static inset-y-0 left-0 w-72 md:w-80 h-screen bg-[#0f172a] backdrop-blur-3xl text-white flex flex-col z-[100] shadow-2xl border-r border-white/5 lg:!translate-x-0"
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         {/* Brand Header */}
-        <div className="p-10 pb-12 flex items-center gap-5">
-          <div className="w-12 h-12 bg-gradient-to-br from-rakshak-blue to-rakshak-saffron rounded-2xl flex items-center justify-center shadow-[0_10px_30px_rgba(26,60,110,0.4)] transform rotate-3 active:scale-95 transition-all cursor-crosshair">
-            <span className="text-white text-2xl font-black">R</span>
+        <div className="p-6 md:p-10 pb-8 md:pb-12 flex items-center gap-4 md:gap-5">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-rakshak-blue to-rakshak-saffron rounded-2xl flex items-center justify-center shadow-lg transform rotate-2">
+            <span className="text-white text-xl md:text-2xl font-black">R</span>
           </div>
           <div>
-            <h1 className="font-black text-3xl tracking-tighter">RAKSHAK</h1>
-            <p className="text-[10px] text-blue-300 uppercase tracking-widest font-black opacity-60">Integrity OS v2</p>
+            <h1 className="font-black text-2xl md:text-3xl tracking-tighter">RAKSHAK</h1>
+            <p className="text-[8px] md:text-[10px] text-blue-300 uppercase tracking-widest font-black opacity-60 italic">Integrity OS v2.4</p>
           </div>
         </div>
 
