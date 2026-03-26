@@ -6,12 +6,7 @@ import { motion } from 'framer-motion';
 
 export default function Security() {
   return (
-    <div className="min-h-screen bg-[#0f172a] overflow-hidden flex flex-col text-white">
-      <div className="fixed top-0 left-0 right-0 z-[100]">
-        <IntegrityTicker />
-      </div>
-      <Navbar />
-
+    <div className="min-h-screen bg-slate-900 overflow-hidden flex flex-col">
       <main className="flex-1 max-w-7xl mx-auto px-6 pt-40 pb-20 w-full relative">
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-red-500/10 blur-[100px] -z-10 rounded-full animate-pulse" />
         

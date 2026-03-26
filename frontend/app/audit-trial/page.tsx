@@ -7,11 +7,6 @@ import { motion } from 'framer-motion';
 export default function AuditTrial() {
   return (
     <div className="min-h-screen bg-[#f1f4f9] overflow-hidden flex flex-col">
-      <div className="fixed top-0 left-0 right-0 z-[100]">
-        <IntegrityTicker />
-      </div>
-      <Navbar />
-
       <main className="flex-1 max-w-7xl mx-auto px-6 pt-40 pb-20 w-full relative">
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-slate-500/10 blur-[100px] -z-10 rounded-full animate-pulse" />
         
