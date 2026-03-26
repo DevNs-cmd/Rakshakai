@@ -270,6 +270,7 @@ export default function LandingPage() {
   ];
 
   return (
+    <div className="min-h-screen bg-[#f1f4f9] overflow-hidden flex flex-col selection:bg-rakshak-blue/20">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center pt-24 md:pt-32 pb-20">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">

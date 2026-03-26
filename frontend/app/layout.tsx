@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth-context';
 import { ReactNode } from 'react';
+import Navbar from '@/components/Navbar';
+import IntegrityTicker from '@/components/IntegrityTicker';
 
 const inter = Inter({ 
   subsets: ['latin'], 
@@ -20,9 +22,6 @@ export const metadata: Metadata = {
     type: 'website',
   },
 };
-
-import Navbar from '@/components/Navbar';
-import IntegrityTicker from '@/components/IntegrityTicker';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
