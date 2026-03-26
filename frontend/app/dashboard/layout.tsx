@@ -30,13 +30,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-inter relative">
-      <div className="fixed top-0 left-0 right-0 z-50">
-         <IntegrityTicker />
-      </div>
-      
       <Sidebar />
       
-      <main className="flex-1 overflow-x-hidden overflow-y-auto pt-10 relative">
+      <main className="flex-1 overflow-x-hidden overflow-y-auto pt-16 md:pt-20 relative">
         {/* Subtle Govt Watermark Background */}
         <div className="fixed inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center z-0">
            <div className="text-[12vw] md:text-[200px] font-black uppercase -rotate-12 select-none tracking-tighter text-rakshak-navy">RAKSHAK INTEGRITY</div>

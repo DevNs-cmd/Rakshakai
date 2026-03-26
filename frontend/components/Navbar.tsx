@@ -9,7 +9,10 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   
+  if (pathname?.startsWith('/dashboard')) return null;
+  
   const navItems = [
+    { name: 'Home', path: '/' },
     { name: 'Solutions', path: '/solutions' },
     { name: 'Infrastructure', path: '/infrastructure' },
     { name: 'Audit Trial', path: '/audit-trial' },

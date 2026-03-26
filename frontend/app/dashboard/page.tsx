@@ -210,49 +210,49 @@ const fetchData = useCallback(async (isRefresh = false) => {
   );
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 space-y-6 md:space-y-10">
+    <div className="p-4 sm:p-6 md:p-10 space-y-6 md:space-y-10 selection:bg-rakshak-blue/20">
       {/* ── Dashboard Header ────────────────────────────────────── */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-8 text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-10 text-center sm:text-left">
           {stats && (
-            <div className="shrink-0 scale-75 md:scale-100">
+            <div className="shrink-0 scale-75 md:scale-100 bg-white/50 backdrop-blur-xl rounded-full p-2 border border-white/40 shadow-sm">
               <RiskOrb score={stats.national_risk_score} />
             </div>
           )}
-          <div className="space-y-2">
-            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-              <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight">Executive <span className="text-rakshak-blue/40 italic font-medium">Overwatch</span></h1>
-              <div className="bg-blue-50 text-rakshak-blue text-[8px] md:text-[10px] font-bold px-3 md:px-4 py-1.5 rounded-full uppercase tracking-widest border border-blue-100/50 w-fit mx-auto md:mx-0">
+          <div className="space-y-3">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-5">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-[#0f172a] tracking-tight uppercase">Executive <span className="text-[#3b82f6]/40 italic font-medium">Overwatch</span></h1>
+              <div className="bg-[#3b82f6]/10 text-[#3b82f6] text-[8px] md:text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] border border-[#3b82f6]/20 w-fit mx-auto md:mx-0 shadow-sm">
                 Live National Network
               </div>
             </div>
-            <p className="text-xs md:text-sm text-slate-400 font-medium max-w-lg mx-auto sm:mx-0">
-              Authorized surveillance of 28 States & UTs. Protocol <span className="text-green-600 font-bold">Sync: 100% Verified</span>.
+            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-[0.2em] max-w-lg mx-auto sm:mx-0 leading-relaxed">
+              Authorized surveillance of 28 States & UTs. Protocol <span className="text-green-600 font-black">Sync: 100% Verified</span>.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 md:gap-4">
+        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 md:gap-5">
           <button 
             onClick={handleSimulateFailure}
             disabled={simulating}
-            className={`flex items-center gap-2 px-4 py-2.5 md:py-3 bg-red-50 text-red-600 border border-red-100 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm ${simulating ? 'opacity-50 animate-pulse' : ''}`}
+            className={`flex items-center gap-2.5 px-6 py-3 md:py-4 bg-white text-red-600 border border-red-100 rounded-2xl md:rounded-3xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] hover:bg-red-600 hover:text-white transition-all shadow-sm active:scale-95 ${simulating ? 'opacity-50 animate-pulse' : ''}`}
           >
             <BellRing className="w-3.5 h-3.5 md:w-4 md:h-4" />
             {simulating ? 'Cascading...' : 'Simulate Failure'}
           </button>
           
-          <div className="relative group flex-1 sm:flex-none max-w-md sm:w-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-rakshak-blue transition-colors" />
+          <div className="relative group flex-1 sm:flex-none min-w-[200px] sm:w-auto">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#3b82f6] transition-colors" />
             <input 
               type="text" 
-              placeholder="Search IDs..."
-              className="pl-11 pr-4 py-2.5 md:py-3 bg-white border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rakshak-blue/20 w-full sm:w-48 md:w-72 shadow-sm transition-all"
+              placeholder="SEARCH ID..."
+              className="pl-14 pr-6 py-3 md:py-4 bg-white border border-slate-200 rounded-2xl md:rounded-3xl text-[10px] md:text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-4 focus:ring-[#3b82f6]/5 w-full sm:w-56 md:w-80 shadow-sm transition-all placeholder:text-slate-300"
             />
           </div>
           <button 
             onClick={() => fetchData(true)}
-            className={`p-2.5 md:p-3 bg-white border border-slate-200 rounded-xl md:rounded-2xl shadow-sm hover:bg-slate-50 transition-all ${refreshing ? 'animate-spin' : ''}`}
+            className={`p-3 md:p-4 bg-white border border-slate-200 rounded-2xl md:rounded-3xl shadow-sm hover:bg-slate-50 transition-all active:scale-95 ${refreshing ? 'animate-spin' : ''}`}
           >
             <RefreshCw className="w-4 h-4 md:w-5 md:h-5 text-slate-600" />
           </button>

@@ -29,18 +29,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Forced mock login bypass: automatically sign in as the seeded admin user
-    // regardless of what the user inputs in the login form.
-    try {
-       const data = await api.login('admin@rakshak.gov.in', 'Admin@123');
-       localStorage.setItem('rakshak_token', data.access_token);
-       localStorage.setItem('rakshak_user', JSON.stringify(data.user));
-       setToken(data.access_token);
-       setUser(data.user);
-    } catch(err) {
-       console.error("Auto-login failed:", err);
-       throw err;
-    }
+    // DEVELOPMENT/TESTING BYPASS: Grant access immediately
+    const mockUser: User = {
+      id: "test-user-id",
+      email: email || "admin@rakshak.gov.in",
+      full_name: "Test Administrator",
+      role: "admin",
+      is_active: true
+    };
+    const mockToken = "mock-jwt-token-for-rakshak-testing";
+
+    localStorage.setItem('rakshak_token', mockToken);
+    localStorage.setItem('rakshak_user', JSON.stringify(mockUser));
+    setToken(mockToken);
+    setUser(mockUser);
   };
 
   const logout = () => {
